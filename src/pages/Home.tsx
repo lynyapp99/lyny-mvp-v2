@@ -24,7 +24,6 @@ import EditModeButton from "@/components/EditModeButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TimelineShortcuts from "@/components/TimelineShortcuts";
 import AddShortcutModal from "@/components/AddShortcutModal";
-import TimelineCard from "@/components/TimelineCard";
 import AddSectorCard from "@/components/AddSectorCard";
 import {
   Sheet,
