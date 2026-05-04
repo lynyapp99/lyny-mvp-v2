@@ -82,7 +82,7 @@ export const useCreateTimeline = () => {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (input: { sector_id: string; title: string; subtitle?: string; cover_url?: string; privacy?: TimelineRow["privacy"] }) => {
+    mutationFn: async (input: { sector_id: string | null; title: string; subtitle?: string; cover_url?: string; privacy?: TimelineRow["privacy"] }) => {
       if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("timelines")
