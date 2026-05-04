@@ -16,6 +16,8 @@ import NoteComposer from "@/components/NoteComposer";
 import MediaViewer from "@/components/MediaViewer";
 import InviteMemberModal from "@/components/InviteMemberModal";
 import ShareSheet from "@/components/ShareSheet";
+import EmptyState from "@/components/EmptyState";
+import { Image as ImageIcon } from "lucide-react";
 
 type Upload = { id: string; name: string; progress: number };
 
@@ -165,15 +167,16 @@ const TimelineDetail = () => {
         )}
 
         {feed.length === 0 && uploads.length === 0 && (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Camera size={24} className="text-muted-foreground" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-2">Nenhum conteúdo ainda</h3>
-            <p className="text-muted-foreground text-sm">
-              Toque no botão + para adicionar fotos, vídeos ou notas.
-            </p>
-          </div>
+          <EmptyState
+            icon={ImageIcon}
+            title="Nenhuma memória ainda"
+            description="Adicione fotos, vídeos ou notas para começar."
+            actionLabel="Adicionar memória"
+            onAction={() => {
+              if ("vibrate" in navigator) navigator.vibrate(10);
+              setSheetOpen(true);
+            }}
+          />
         )}
 
         {feed.map((item) => (
