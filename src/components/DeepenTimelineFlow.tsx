@@ -3,7 +3,7 @@ import { ArrowLeft, Layers, Star, Folder, Palette, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TimelineSelector from "./TimelineSelector";
 import FlagshipTimelineShowcase from "./FlagshipTimelineShowcase";
-import { type Timeline } from "@/data/mockData";
+import { type Timeline } from "@/types/timeline";
 
 interface DeepenTimelineFlowProps {
   onBack: () => void;

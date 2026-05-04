@@ -1,5 +1,5 @@
 import type { SectorRow, TimelineRow, ProfileRow } from "./timelines";
-import type { Sector, Timeline } from "@/data/mockData";
+import type { Sector, Timeline } from "@/types/timeline";
 
 export const sectorFromRow = (row: SectorRow, timelineIds: string[]): Sector => ({
   id: row.id,

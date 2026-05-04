@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { mockUserProfile, updatePublicProfile } from "@/data/profileData";
-import { mockTimelines } from "@/data/mockData";
+import { useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
 import { useToast } from "@/hooks/use-toast";
 
 interface PublicProfileSettingsProps {
@@ -19,7 +20,8 @@ const PublicProfileSettings = ({ onBack, onPreview }: PublicProfileSettingsProps
   const [profileData, setProfileData] = useState(mockUserProfile.publicProfile);
   const [linkCopied, setLinkCopied] = useState(false);
 
-  const availableTimelines = mockTimelines.filter(timeline => 
+  const { data: timelineRows = [] } = useTimelines();
+  const availableTimelines = timelineRows.map(timelineFromRow).filter(timeline => 
     timeline.privacy === "shared" || timeline.privacy === "public"
   );
 

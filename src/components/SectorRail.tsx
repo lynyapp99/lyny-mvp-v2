@@ -1,5 +1,4 @@
 import { Plus, type LucideIcon } from "lucide-react";
-import { mockSectors } from "@/data/mockData";
 import { getSectorIcon } from "@/lib/sectorIcons";
 
 interface ExtendedSector {
@@ -19,7 +18,7 @@ interface SectorRailProps {
 }
 
 const SectorRail = ({ activeSector, onSectorChange, sectors }: SectorRailProps) => {
-  const allSectors = sectors || mockSectors;
+  const allSectors = sectors || [];
 
   const SectorChip = ({ sector, isActive }: { sector: ExtendedSector; isActive: boolean }) => {
     const Icon = sector.icon ?? getSectorIcon(sector.emoji);

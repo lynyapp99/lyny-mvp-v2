@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Timeline } from "@/data/mockData";
+import { Timeline } from "@/types/timeline";
 import { toast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
 
@@ -14,10 +14,10 @@ interface TimelineModalProps {
   onClose: () => void;
   onSave: (timeline: Partial<Timeline>) => void;
   editingTimeline?: Timeline | null;
-  sectorId: string;
+  sectorId?: string | null;
 }
 
-const TimelineModal = ({ isOpen, onClose, onSave, editingTimeline, sectorId }: TimelineModalProps) => {
+const TimelineModal = ({ isOpen, onClose, onSave, editingTimeline, sectorId = null }: TimelineModalProps) => {
   const [title, setTitle] = useState(editingTimeline?.title || "");
   const [subtitle, setSubtitle] = useState(editingTimeline?.subtitle || "");
   const [isHidden, setIsHidden] = useState(editingTimeline?.isHidden || false);

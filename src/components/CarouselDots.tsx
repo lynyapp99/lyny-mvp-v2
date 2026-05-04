@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Sector } from "@/data/mockData";
+import { Sector } from "@/types/timeline";
 
 interface CarouselDotsProps {
   total: number;

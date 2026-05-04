@@ -8,7 +8,6 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
 import { mockRelationships, type Relationship } from "@/data/relationshipData";
-import { mockTimelines } from "@/data/mockData";
 
 const Relationships = () => {
   const [relationships, setRelationships] = useState<Relationship[]>(mockRelationships);
@@ -35,7 +34,7 @@ const Relationships = () => {
   const unpinnedRelationships = filteredRelationships.filter(rel => !rel.isPinned);
 
   const totalTimelines = relationships.reduce((sum, rel) => sum + rel.timelineIds.length, 0);
-  const totalMemories = mockTimelines.reduce((sum, timeline) => sum + timeline.items, 0);
+  const totalMemories = 0;
 
   const EmptyState = () => (
     <div className="flex flex-col items-center justify-center py-12 px-4">

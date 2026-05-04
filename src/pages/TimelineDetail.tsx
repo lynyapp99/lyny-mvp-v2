@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { GlassCard } from "@/components/ui/glass-card";
 import { IOSButton } from "@/components/ui/ios-button";
 import { SpringAnimation } from "@/components/ui/spring-animation";
-import { mockTimelines } from "@/data/mockData";
+import { useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
 import { getMemoriesForTimeline, addReactionToMemory, addCommentToMemory, type TimelineMemory } from "@/data/timelineMemories";
 import { useToast } from "@/hooks/use-toast";
 import MemoryDetailModal from "@/components/MemoryDetailModal";
@@ -21,6 +22,7 @@ const TimelineDetail = () => {
   const { timelineId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: timelineRows = [] } = useTimelines();
   const [memories, setMemories] = useState<TimelineMemory[]>([]);
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
   const [showComments, setShowComments] = useState<{ [key: string]: boolean }>({});
@@ -33,7 +35,7 @@ const TimelineDetail = () => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
-  const timeline = mockTimelines.find(t => t.id === timelineId);
+  const timeline = timelineRows.map(timelineFromRow).find(t => t.id === timelineId);
 
   useEffect(() => {
     if (timelineId) {

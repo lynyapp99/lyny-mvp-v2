@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, X, Check } from "lucide-react";
-import { Timeline } from "@/data/mockData";
+import { Timeline } from "@/types/timeline";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";

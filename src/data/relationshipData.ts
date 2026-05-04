@@ -1,4 +1,4 @@
-import { Member } from "./mockData";
+import { Member } from "@/types/timeline";
 
 export interface Relationship {
   id: string;

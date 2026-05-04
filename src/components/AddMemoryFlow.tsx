@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Camera, Type, Link as LinkIcon, MapPin, Tag, Calendar, ExternalLink, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TimelineSelector from "./TimelineSelector";
-import { type Timeline } from "@/data/mockData";
+import { type Timeline } from "@/types/timeline";
 
 interface AddMemoryFlowProps {
   onBack: () => void;

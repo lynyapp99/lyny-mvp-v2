@@ -1,0 +1,1 @@
+ALTER TABLE public.timelines ALTER COLUMN sector_id DROP NOT NULL;

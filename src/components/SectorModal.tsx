@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sector } from "@/data/mockData";
+import { Sector } from "@/types/timeline";
 import { toast } from "@/hooks/use-toast";
 
 interface SectorModalProps {
@@ -72,7 +72,7 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
             <Label htmlFor="sector-name">Nome do Setor</Label>
             <Input
               id="sector-name"
-              placeholder="Ex: Família, Amigos, Projetos..."
+              placeholder="Nome do setor"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="rounded-app"
