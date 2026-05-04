@@ -26,8 +26,8 @@ const Relationships = () => {
     <div className="min-h-screen bg-background pb-24">
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-divider">
         <div className="max-w-md mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Relacionamentos</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <h1 className="font-display font-semibold text-3xl text-foreground">Relacionamentos</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Organize pelas pessoas que mais importam
           </p>
         </div>
