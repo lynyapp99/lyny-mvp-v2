@@ -118,6 +118,58 @@ All colors MUST be HSL. */
     --radius-lg: 1rem;
   }
 
+  /* Light theme overrides — applied when <html class="light"> */
+  .light {
+    --bg: 36 38% 97%;             /* #FAF7F2 */
+    --surface: 0 0% 100%;         /* #FFFFFF */
+    --surface-2: 40 41% 90%;      /* #F0E8D8 */
+
+    --text: 28 39% 17%;           /* #3B2A1A */
+    --text-2: 28 39% 30%;         /* #6B4C30 */
+
+    --divider: 33 32% 86%;        /* #E8DDD0 */
+
+    --accent: 15 52% 54%;         /* #C7694A terracota */
+    --accent-press: 15 52% 44%;
+    --accent-soft: 15 52% 92%;
+
+    --focus: 15 52% 54% / 0.35;
+    --ring: 15 52% 54%;
+
+    --background: 36 38% 97%;
+    --foreground: 28 39% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 28 39% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 28 39% 17%;
+
+    --primary: 15 52% 54%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 41% 90%;
+    --secondary-foreground: 28 39% 17%;
+
+    --muted: 40 41% 92%;
+    --muted-foreground: 28 39% 30%;
+
+    --accent-color: 15 52% 54%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 15 52% 54%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 33 32% 86%;
+    --input: 33 32% 86%;
+
+    --badge-private-bg: 117 23% 81%;
+    --badge-private-fg: 118 36% 26%;
+
+    --card-glow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+    --elev-1: 0 2px 8px rgb(60 40 20 / 0.08);
+    --elev-2: 0 6px 20px rgb(60 40 20 / 0.10);
+  }
+
+
   * {
     @apply border-border;
   }
