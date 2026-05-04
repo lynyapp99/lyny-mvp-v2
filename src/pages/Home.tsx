@@ -8,14 +8,11 @@ import SettingsScreen from "@/components/SettingsScreen";
 import { useHiddenTimelineSession } from "@/hooks/useHiddenTimelineSession";
 import { GlassCard } from "@/components/ui/glass-card";
 import RecentAndFavorites from "@/components/RecentAndFavorites";
-import { 
-  mockSectors, 
-  mockTimelines, 
-  getTimelinesBySector, 
-  searchTimelines, 
-  Timeline,
-  Sector 
-} from "@/data/mockData";
+import type { Timeline, Sector } from "@/data/mockData";
+import { useSectors, useTimelines, useCreateSector, useDeleteSector, useCreateTimeline } from "@/lib/api/timelines";
+import { buildSectorsWithTimelines } from "@/lib/api/adapters";
+import { useProfile } from "@/lib/api/timelines";
+import { useAuth } from "@/hooks/useAuth";
 import SectorCarouselPage from "@/components/SectorCarouselPage";
 import CarouselDots from "@/components/CarouselDots";
 import SectorModal from "@/components/SectorModal";
@@ -35,6 +32,25 @@ import {
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: profile } = useProfile();
+  const { data: sectorRows = [] } = useSectors();
+  const { data: timelineRows = [] } = useTimelines();
+  const createSector = useCreateSector();
+  const deleteSector = useDeleteSector();
+  const createTimelineMut = useCreateTimeline();
+
+  const { sectors: dbSectors, timelines: allTimelines } = buildSectorsWithTimelines(sectorRows, timelineRows);
+  const getTimelinesBySector = (id: string) => allTimelines.filter((t) => t.sectorId === id);
+  const searchTimelines = (q: string) => {
+    const lq = q.toLowerCase();
+    return allTimelines.filter((t) =>
+      t.title.toLowerCase().includes(lq) ||
+      (t.subtitle ?? "").toLowerCase().includes(lq) ||
+      (t.tags ?? []).some((tag) => tag.toLowerCase().includes(lq))
+    );
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [authTimelineId, setAuthTimelineId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +66,8 @@ const Home = () => {
   
   // Sector carousel state
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
-  const [sectors, setSectors] = useState<Sector[]>(mockSectors);
+  const [sectorOverride, setSectorOverride] = useState<Sector[] | null>(null);
+  const sectors = sectorOverride ?? dbSectors;
   const [isSectorModalOpen, setIsSectorModalOpen] = useState(false);
   const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
   const [editingSector, setEditingSector] = useState<Sector | null>(null);
@@ -58,7 +75,7 @@ const Home = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [draggedTimeline, setDraggedTimeline] = useState<{id: string, sourceSectorId: string} | null>(null);
-  const [shortcuts, setShortcuts] = useState<Timeline[]>(mockTimelines.slice(0, 3)); // Start with 3 shortcuts
+  const [shortcuts, setShortcuts] = useState<Timeline[]>([]);
   const [isShortcutsLoading, setIsShortcutsLoading] = useState(false);
   const [isAddShortcutModalOpen, setIsAddShortcutModalOpen] = useState(false);
 
@@ -134,30 +151,23 @@ const Home = () => {
   };
 
   // Sector handlers
-  const handleSaveSector = (sectorData: Omit<Sector, "id" | "members" | "timelineIds">) => {
-    if (editingSector) {
-      // Update existing sector
-      setSectors(prev => prev.map(s => 
-        s.id === editingSector.id 
-          ? { ...s, ...sectorData }
-          : s
-      ));
-    } else {
-      // Create new sector
-      const newSector: Sector = {
-        ...sectorData,
-        id: `sec_${Date.now()}`,
-        members: [],
-        timelineIds: [],
-      };
-      setSectors(prev => [...prev, newSector]);
-      
-      // Scroll to the new sector (before the "add" card)
-      setTimeout(() => {
-        scrollToSector(sectors.length); // Index of the newly added sector
-      }, 100);
+  const handleSaveSector = async (sectorData: Omit<Sector, "id" | "members" | "timelineIds">) => {
+    try {
+      if (editingSector) {
+        toast({ title: "Editing not yet wired", description: "Coming soon — for now create a new sector." });
+      } else {
+        await createSector.mutateAsync({
+          name: sectorData.name,
+          emoji: sectorData.emoji,
+          color: sectorData.color,
+        });
+        setTimeout(() => scrollToSector(sectors.length), 100);
+      }
+    } catch (e: unknown) {
+      toast({ title: "Could not save sector", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    } finally {
+      setEditingSector(null);
     }
-    setEditingSector(null);
   };
 
   const handleEditSector = (sector: Sector) => {
@@ -170,15 +180,24 @@ const Home = () => {
     setIsTimelineModalOpen(true);
   };
 
-  const handleSaveTimeline = (timelineData: Partial<Timeline>) => {
-    // In a real app, this would add to the timeline list
-    console.log("Creating timeline:", timelineData);
-    // Mock: just show success
+  const handleSaveTimeline = async (timelineData: Partial<Timeline>) => {
+    try {
+      await createTimelineMut.mutateAsync({
+        sector_id: selectedSectorForTimeline,
+        title: timelineData.title ?? "Untitled",
+        subtitle: timelineData.subtitle,
+        cover_url: timelineData.cover,
+        privacy: timelineData.privacy,
+      });
+      toast({ title: "Timeline created" });
+    } catch (e: unknown) {
+      toast({ title: "Could not create timeline", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    }
   };
 
   // Get filtered timelines
   const getFilteredTimelines = () => {
-    let filteredTimelines = searchQuery ? searchTimelines(searchQuery) : mockTimelines;
+    let filteredTimelines = searchQuery ? searchTimelines(searchQuery) : allTimelines;
 
     // Apply filters
     if (filters.sectors.length > 0) {
@@ -322,7 +341,7 @@ const Home = () => {
 
   // Get available timelines for shortcuts (not already in shortcuts)
   const getAvailableTimelinesForShortcuts = () => {
-    return mockTimelines.filter(t => !shortcuts.some(s => s.id === t.id));
+    return allTimelines.filter(t => !shortcuts.some(s => s.id === t.id));
   };
 
   const handleRemoveTimeline = (timelineId: string) => {
@@ -335,15 +354,14 @@ const Home = () => {
     }
   };
 
-  const handleRemoveSector = (sectorId: string) => {
+  const handleRemoveSector = async (sectorId: string) => {
     const sector = sectors.find(s => s.id === sectorId);
-    setSectors(prev => prev.filter(s => s.id !== sectorId));
-    toast({
-      title: "Setor removido",
-      description: `O setor "${sector?.name}" foi removido`,
-    });
-    if ("vibrate" in navigator) {
-      navigator.vibrate([10, 20, 10]);
+    try {
+      await deleteSector.mutateAsync(sectorId);
+      toast({ title: "Setor removido", description: `O setor "${sector?.name}" foi removido` });
+      if ("vibrate" in navigator) navigator.vibrate([10, 20, 10]);
+    } catch (e: unknown) {
+      toast({ title: "Erro", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     }
   };
 
@@ -685,7 +703,7 @@ const Home = () => {
       {authTimelineId && (
         <HiddenTimelineAuth
           authMethod={
-            mockTimelines.find(t => t.id === authTimelineId)?.authMethod || "biometric"
+            allTimelines.find(t => t.id === authTimelineId)?.authMethod || "biometric"
           }
           onSuccess={handleAuthSuccess}
           onCancel={handleAuthCancel}
