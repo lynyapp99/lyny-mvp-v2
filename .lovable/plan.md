@@ -1,85 +1,59 @@
-# Adicionar conteúdo dentro da timeline (foto, vídeo, nota)
+# Refinamento Geral de UI
 
-Hoje a tela `TimelineDetail` lê de mocks (`@/data/timelineMemories`) e o `AddMemoryFlow` é um wizard antigo de várias etapas que não persiste nada. Vou substituir por um fluxo direto, ligado ao Supabase, dentro da própria timeline.
+## 1. Bottom Navigation — só ícones
 
-## Mudanças no banco
+`src/components/Navigation.tsx`:
+- Remover labels de texto
+- Ícones `size={24}` (ativo `strokeWidth={2.5}`, inativo `strokeWidth={2}`)
+- Padding: `pt-4` (16px) + `pb-5` (20px) somado a `env(safe-area-inset-bottom)`
+- Botões: `min-h-[48px] min-w-[48px]`, ícone centralizado
+- Ativo: `text-primary` + fundo `bg-primary/15` arredondado
+- Inativo: `text-muted-foreground/60`
+- Manter `aria-label` e haptic
 
-A tabela `memories` ainda não tem campo de tipo. Adiciono um enum `memory_kind` para distinguir nota de mídia:
+## 2. Componente EmptyState reutilizável
 
-```sql
-CREATE TYPE public.memory_kind AS ENUM ('note', 'media');
-ALTER TABLE public.memories
-  ADD COLUMN kind public.memory_kind NOT NULL DEFAULT 'media';
-```
-
-`memory_media.kind` (`image` | `video`) já existe e basta para diferenciar foto de vídeo no feed.
-
-Bucket `memories` já está criado e público. Adiciono policies de Storage para escrita/leitura restritas ao dono (path = `timeline_id/photos/...` ou `timeline_id/videos/...`, primeiro segmento = timeline cujo `user_id = auth.uid()`):
-
-```sql
-CREATE POLICY "Users upload to own timeline folder"
-ON storage.objects FOR INSERT TO authenticated
-WITH CHECK (
-  bucket_id = 'memories'
-  AND EXISTS (
-    SELECT 1 FROM public.timelines t
-    WHERE t.id::text = (storage.foldername(name))[1]
-      AND t.user_id = auth.uid()
-  )
-);
--- + policies análogas para SELECT/DELETE no mesmo bucket
-```
-
-## Camada de dados
-
-Novo arquivo `src/lib/api/memories.ts` com hooks React Query:
-
-- `useTimelineMemories(timelineId)` — `SELECT memories + memory_media` ordenado por `created_at DESC` (mais recente primeiro). Retorna itens normalizados: `{ id, kind: 'note'|'photo'|'video', text, mediaUrl, createdAt }`.
-- `useCreateNote(timelineId)` — insere em `memories` com `kind='note'` e `description=texto`.
-- `useUploadMedia(timelineId)` — para cada arquivo:
-  1. Cria registro em `memories` com `kind='media'`.
-  2. Faz `supabase.storage.from('memories').upload('{timelineId}/photos|videos/{uuid}.{ext}', file)` com callback de progresso.
-  3. Insere em `memory_media` com `kind`, `storage_path`, `public_url`, `user_id`, `memory_id`.
-  4. Em caso de erro, faz rollback (apaga memory criado).
-- Invalida queries `['memories', timelineId]` ao final.
-
-## UI dentro de `TimelineDetail`
-
-1. **Remover dependências de mock**: tirar imports de `@/data/timelineMemories`, `EmbedCard`, `TimelineMapView`, filtros de comida etc. Manter só o feed real.
-2. **Botão "+" flutuante**: FAB fixo `bottom-6 right-6`, 56×56, cor primária, abre o bottom sheet.
-3. **Bottom sheet** (`AddContentSheet.tsx`, novo): usa `Sheet`/`Drawer` do shadcn, lista 3 opções com ícones grandes (44×44 mínimo, haptic on tap):
-   - Foto → abre `<input type="file" accept="image/*" multiple>`
-   - Vídeo → abre `<input type="file" accept="video/*" multiple>`
-   - Nota → abre tela/modal com `<textarea>` e botão "Salvar"
-4. **Progresso de upload**: lista local de uploads em andamento renderizada no topo do feed; cada item mostra nome do arquivo + barra (`Progress` do shadcn) + % calculado a partir do callback de `XMLHttpRequest` que envolvo no `upload`. Ao finalizar, item somente desaparece quando o `useTimelineMemories` revalida.
-5. **Feed cronológico** (`MemoryFeedItem.tsx`, novo):
-   - **Nota**: card com `description` em texto.
-   - **Foto**: imagem `object-cover`, aspect 4/3, toque abre lightbox.
-   - **Vídeo**: `<video>` com `preload="metadata"` mostrando o primeiro frame + overlay de ícone Play centralizado; toque abre player fullscreen.
-   - Cada card mostra data relativa formatada.
-6. **Fullscreen viewer** (`MediaViewer.tsx`, novo): overlay `fixed inset-0 bg-black z-50`, suporta swipe para fechar e navegação ←/→ entre mídias da timeline. Reusa `ImageLightbox` para fotos quando possível e adiciona `<video controls autoPlay playsInline>` para vídeos.
-
-## Limpeza
-
-- `AddMemoryFlow.tsx` antigo deixa de ser usado dentro de `TimelineDetail`. Verifico outros consumidores e removo se ficar órfão.
-- Removo do `TimelineDetail` os blocos de "Categorias/Filtros", "Marcos" e "Mapa" que dependiam só de mock; podem voltar depois quando houver dados reais.
-
-## Layout do bottom sheet
+Criar `src/components/EmptyState.tsx`:
 
 ```text
-┌─────────────────────────────┐
-│  Adicionar à timeline       │
-│                             │
-│  📷  Foto                   │
-│  🎬  Vídeo                  │
-│  📝  Nota                   │
-│                             │
-│        [ Cancelar ]         │
-└─────────────────────────────┘
+[ Ícone Lucide em círculo 64x64, bg muted/40 ]
+        Título (font-semibold)
+        Subtítulo (text-muted-foreground, text-sm)
+   [ Botão de ação opcional ]
 ```
 
-## Notas
+Props: `icon`, `title`, `description`, `actionLabel?`, `onAction?`.
+Layout: flex-col, `gap-3`, `py-12`, centralizado.
 
-- Mantenho dark theme e alvos de toque ≥44px conforme regras do projeto.
-- Sem autoplay de vídeos no feed; só inicia ao abrir fullscreen.
-- Ordenação puramente por `created_at DESC`, sem agrupamentos.
+## 3. Aplicar EmptyState
+
+- **Notificações**: `Bell`, "Nenhuma notificação por enquanto", "Quando alguém interagir com suas timelines, você verá aqui."
+- **Relacionamentos**: `Users`, "Nenhum relacionamento ainda", "Conecte-se com pessoas para ver seus relacionamentos aqui.", botão "Adicionar pessoa"
+- **TimelineDetail (feed vazio)**: `Image`, "Nenhuma memória ainda", botão "Adicionar memória"
+- **Profile** (seções vazias): mesmo padrão
+
+## 4. Remoção de dados mockados em Notificações e Relacionamentos
+
+- Garantir que `Notifications.tsx` e `Relationships.tsx` não importem nem renderizem nada de `src/data/*` ou arrays hardcoded
+- Conectar `Relationships.tsx` à tabela `connections` do Supabase via `useQuery` para o usuário logado — se vazio, mostrar EmptyState
+- `Notifications.tsx`: não há tabela de notificações; manter apenas o EmptyState (sem array mock)
+- Remover/limpar `src/data/relationshipData.ts` se não for mais usado em nenhum outro lugar (verificar com `rg`)
+
+## 5. Padronização de espaçamento
+
+- Cards: padding interno mínimo `p-4` (16px) — shadcn `Card` já cumpre
+- Gaps entre elementos: mínimo `gap-3` / `space-y-3` (12px)
+- `TimelineFeedCard.tsx`: subir padding do rodapé `p-3` → `p-4`, gaps internos `gap-3`
+- Sheets (`AddContentSheet`, `NoteComposer`, `ShareSheet`): garantir `p-4` e `gap-3`
+- Headers de página: `mb-6`
+
+## Arquivos
+
+- criar: `src/components/EmptyState.tsx`
+- editar: `src/components/Navigation.tsx`
+- editar: `src/pages/Notifications.tsx`
+- editar: `src/pages/Relationships.tsx` (+ query Supabase)
+- editar: `src/pages/TimelineDetail.tsx`
+- editar: `src/components/TimelineFeedCard.tsx`
+- editar: `src/pages/Profile.tsx` (estados vazios)
+- possivelmente remover: `src/data/relationshipData.ts`

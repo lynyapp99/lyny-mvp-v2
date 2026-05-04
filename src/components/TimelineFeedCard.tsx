@@ -53,11 +53,11 @@ const TimelineFeedCard = ({ item, onOpen }: Props) => {
         )}
       </div>
       {item.text && (
-        <div className="p-3 text-left">
+        <div className="p-4 text-left">
           <p className="text-sm text-foreground">{item.text}</p>
         </div>
       )}
-      <div className="px-3 pb-3 text-left">
+      <div className="px-4 pb-4 text-left">
         <p className="text-xs text-muted-foreground">{formatRelativeDate(item.createdAt)}</p>
       </div>
     </button>
