@@ -149,17 +149,17 @@ const Profile = () => {
               <div>
                 <div className="font-semibold text-foreground">Perfil público</div>
                 <div className="text-sm text-muted-foreground">
-                  {user.publicProfile.enabled ? "Visível para outras pessoas" : "Apenas privado"}
+                  {profileState.publicProfile.enabled ? "Visível para outras pessoas" : "Apenas privado"}
                 </div>
               </div>
             </div>
             <Switch
-              checked={user.publicProfile.enabled}
+              checked={profileState.publicProfile.enabled}
               onCheckedChange={handlePublicProfileToggle}
             />
           </div>
           
-          {user.publicProfile.enabled && (
+          {profileState.publicProfile.enabled && (
             <div className="text-xs text-muted-foreground">
               {publicTimelines.length} timeline{publicTimelines.length !== 1 ? 's' : ''} shared publicly
             </div>
@@ -167,21 +167,21 @@ const Profile = () => {
         </GlassCard>
 
         {/* Public Profile Preview */}
-        {user.publicProfile.enabled ? (
+        {profileState.publicProfile.enabled ? (
           <div className="space-y-6">
             {/* Profile Header Preview */}
             <div className="text-center">
               <Avatar className="w-20 h-20 mx-auto mb-4">
-                <AvatarImage src={user.publicProfile.avatar} />
+                <AvatarImage src={profileState.publicProfile.avatar} />
                 <AvatarFallback className="text-xl font-semibold bg-primary/10 text-primary">
-                  {user.publicProfile.displayName.split(' ').map(n => n[0]).join('')}
+                  {profileState.publicProfile.displayName.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
               
-              <h2 className="text-xl font-bold text-foreground">{user.publicProfile.displayName}</h2>
+              <h2 className="text-xl font-bold text-foreground">{profileState.publicProfile.displayName}</h2>
               
-              {user.publicProfile.bio && (
-                <p className="text-muted-foreground mt-2 px-4">{user.publicProfile.bio}</p>
+              {profileState.publicProfile.bio && (
+                <p className="text-muted-foreground mt-2 px-4">{profileState.publicProfile.bio}</p>
               )}
 
               {/* Public Stats */}
