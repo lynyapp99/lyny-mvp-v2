@@ -1,0 +1,483 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Shadow Design System - Dark app-only
+All colors MUST be HSL. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Shadow Base Colors */
+    --bg: 240 5% 5%;              /* #0B0B0C */
+    --surface: 240 8% 8%;         /* #121214 */
+    --surface-2: 240 8% 10%;      /* #18181B */
+    
+    /* Text & Icons */
+    --text: 0 0% 100%;            /* #FFFFFF */
+    --text-2: 222 11% 81%;        /* #C9CAD1 */
+    
+    /* Dividers */
+    --divider: 240 6% 17%;        /* #2A2A2E */
+    
+    /* Accent (Red) */
+    --accent: 353 87% 48%;        /* #E0162B */
+    --accent-press: 353 84% 38%;  /* #B50F21 */
+    --accent-soft: 353 57% 12%;   /* #2A0D11 */
+    
+    /* Warning/Detail (Gold) */
+    --warning: 45 89% 61%;        /* #F4C542 */
+    --warning-dark: 45 100% 36%;  /* #B88900 */
+    
+    /* Focus & Ring */
+    --focus: 353 87% 48% / 0.4;
+    --ring: 45 89% 61%;           /* Gold ring */
+    
+    /* Shadows */
+    --elev-1: 0 2px 8px rgb(0 0 0 / 0.35);
+    --elev-2: 0 6px 20px rgb(0 0 0 / 0.45);
+    
+    /* Sistema Base (Shadow) */
+    --background: 240 5% 5%;
+    --foreground: 0 0% 100%;
+    --card: 240 8% 8%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 100%;
+    
+    /* Primary = Red accent */
+    --primary: 353 87% 48%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary = Surface-2 */
+    --secondary: 240 8% 10%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Muted */
+    --muted: 240 8% 10%;
+    --muted-foreground: 222 11% 81%;
+    
+    /* Accent (mapped to red) */
+    --accent-color: 353 87% 48%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Destructive (using red) */
+    --destructive: 353 87% 48%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders & inputs */
+    --border: 240 6% 17%;
+    --input: 240 8% 10%;
+    --radius: 0.875rem;
+    
+    /* Chart colors (adjusted for dark) */
+    --chart-1: 353 87% 48%;
+    --chart-2: 142 70% 45%;
+    --chart-3: 45 89% 61%;
+    --chart-4: 210 80% 50%;
+    --chart-5: 270 70% 60%;
+    
+    /* Timeline colors (adapted) */
+    --timeline-pink: 353 87% 48%;
+    --timeline-blue: 210 80% 50%;
+    --timeline-green: 142 70% 45%;
+    --timeline-yellow: 45 89% 61%;
+    --timeline-purple: 270 70% 60%;
+    --timeline-orange: 25 85% 55%;
+    
+    /* Legacy brand colors for compatibility */
+    --lyny-peach: 25 85% 55%;
+    --lyny-blush: 353 87% 48%;
+    --lyny-aqua: 192 60% 40%;
+    --lyny-mint: 142 70% 45%;
+    --lyny-gold: 45 89% 61%;
+    --lyny-lavender: 270 70% 60%;
+    --lyny-sand: 240 8% 10%;
+    --lyny-graphite: 240 5% 5%;
+    
+    /* Gradients for sectors (dark adapted) */
+    --pink-gradient: linear-gradient(135deg, hsl(353, 87%, 48%) 0%, hsl(353, 84%, 38%) 100%);
+    --blue-gradient: linear-gradient(135deg, hsl(210, 80%, 50%) 0%, hsl(210, 70%, 40%) 100%);
+    --green-gradient: linear-gradient(135deg, hsl(142, 70%, 45%) 0%, hsl(142, 60%, 35%) 100%);
+    --purple-gradient: linear-gradient(135deg, hsl(270, 70%, 60%) 0%, hsl(270, 60%, 50%) 100%);
+    --orange-gradient: linear-gradient(135deg, hsl(25, 85%, 55%) 0%, hsl(25, 75%, 45%) 100%);
+    --yellow-gradient: linear-gradient(135deg, hsl(45, 89%, 61%) 0%, hsl(45, 100%, 36%) 100%);
+    
+    /* Shadows & elevations */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.45);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.55), 0 8px 10px -6px rgb(0 0 0 / 0.55);
+    --shadow-elevated: 0 12px 28px 0 rgb(0 0 0 / 0.45), 0 4px 8px 0 rgb(0 0 0 / 0.4);
+    
+    /* Card glow */
+    --card-glow: 0 0 0 1px rgba(224, 22, 43, 0.18);
+    
+    /* Radius tokens */
+    --radius-card: 0.875rem;
+    --radius-lg: 1rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overscroll-behavior-y: none;
+  }
+
+  /* Smooth scrolling & touch optimization */
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+  
+  html, body, #root {
+    height: 100%;
+  }
+  
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* iOS Safe Areas */
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Lyny Carousel & Scroll Utilities */
+@layer utilities {
+  /* Carrossel Horizontal com Snap */
+  .carousel-horizontal {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .carousel-horizontal::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .carousel-item {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  
+  .scroll-snap-stop-always {
+    scroll-snap-stop: always;
+  }
+  
+  .scroll-snap-align-start {
+    scroll-snap-align: start;
+  }
+  
+  /* Touch actions */
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Skeleton Loader */
+  .skeleton {
+    @apply animate-pulse bg-gradient-to-r from-muted via-muted/50 to-muted bg-[length:200%_100%];
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  /* Smooth Transitions - Lyny Easing */
+  .transition-lyny {
+    transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  
+  .transition-lyny-fast {
+    transition: all 150ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@layer components {
+  /* Shadow Background Gradients */
+  .bg-shadow-1 {
+    background: linear-gradient(to bottom right, hsl(var(--surface)) 0%, hsl(var(--surface-2)) 100%);
+  }
+  
+  .bg-shadow-2 {
+    background: linear-gradient(to bottom right, hsl(var(--surface-2)) 0%, hsl(var(--bg)) 100%);
+  }
+
+  /* Sector Cards Shadow - Dark themed with subtle red glow */
+  .sector-card-pink {
+    background: var(--pink-gradient);
+    @apply text-foreground;
+    border: 1px solid hsl(var(--divider));
+    box-shadow: var(--card-glow), var(--shadow-md);
+  }
+  
+  .sector-card-blue {
+    background: var(--blue-gradient);
+    @apply text-foreground;
+    border: 1px solid hsl(var(--divider));
+    box-shadow: var(--card-glow), var(--shadow-md);
+  }
+  
+  .sector-card-green {
+    background: var(--green-gradient);
+    @apply text-foreground;
+    border: 1px solid hsl(var(--divider));
+    box-shadow: var(--card-glow), var(--shadow-md);
+  }
+  
+  .sector-card-purple {
+    background: var(--purple-gradient);
+    @apply text-foreground;
+    border: 1px solid hsl(var(--divider));
+    box-shadow: var(--card-glow), var(--shadow-md);
+  }
+  
+  .sector-card-orange {
+    background: var(--orange-gradient);
+    @apply text-foreground;
+    border: 1px solid hsl(var(--divider));
+    box-shadow: var(--card-glow), var(--shadow-md);
+  }
+  
+  .sector-card-yellow {
+    background: var(--yellow-gradient);
+    @apply text-foreground;
+    border: 1px solid hsl(var(--divider));
+    box-shadow: var(--card-glow), var(--shadow-md);
+  }
+
+  /* Shadow Sector Title Colors */
+  .sector-title-pink {
+    color: hsl(var(--timeline-pink));
+  }
+  
+  .sector-title-blue {
+    color: hsl(var(--timeline-blue));
+  }
+  
+  .sector-title-green {
+    color: hsl(var(--timeline-green));
+  }
+  
+  .sector-title-yellow {
+    color: hsl(var(--timeline-yellow));
+  }
+  
+  .sector-title-purple {
+    color: hsl(var(--timeline-purple));
+  }
+  
+  .sector-title-orange {
+    color: hsl(var(--timeline-orange));
+  }
+
+  /* Shadow Buttons - Mobile-first (no hover, active only) */
+  .lyny-button {
+    @apply rounded-pill px-4 py-3 font-semibold overflow-hidden;
+    min-height: 44px;
+    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
+    touch-action: manipulation;
+  }
+  
+  .lyny-button:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px hsl(var(--focus));
+  }
+  
+  .lyny-button-primary {
+    @apply lyny-button;
+    background: hsl(var(--accent));
+    color: hsl(var(--text));
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .lyny-button-primary:active {
+    background: hsl(var(--accent-press));
+    transform: scale(0.98);
+  }
+  
+  .lyny-button-subtle {
+    @apply lyny-button text-foreground;
+    background: hsl(var(--surface-2));
+    border: 1px solid hsl(var(--divider));
+  }
+  
+  .lyny-button-subtle:active {
+    transform: scale(0.98);
+    filter: brightness(0.9);
+  }
+  
+  .lyny-button-ghost {
+    @apply rounded-app px-4 py-3 font-semibold bg-transparent;
+    min-height: 44px;
+    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
+    color: hsl(var(--text));
+    border: none;
+    touch-action: manipulation;
+  }
+  
+  .lyny-button-ghost:active {
+    background: hsl(var(--surface-2));
+    transform: scale(0.98);
+  }
+  
+  .lyny-button-ghost:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Shadow Cards - Mobile-first with red glow */
+  .lyny-card {
+    @apply bg-card rounded-app-xl overflow-hidden;
+    border: 1px solid hsl(var(--divider));
+    box-shadow: var(--card-glow), var(--shadow-sm);
+    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  
+  .lyny-card:active {
+    transform: scale(0.98);
+    box-shadow: var(--card-glow), var(--shadow-md);
+  }
+  
+  .timeline-card {
+    @apply lyny-card;
+  }
+
+  /* Glass morphism - Shadow enhanced */
+  .glass {
+    @apply backdrop-blur-xl border;
+    background: hsl(var(--surface) / 0.85);
+    border-color: hsl(var(--divider));
+    backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Scrollbar hide */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    @apply animate-in fade-in duration-300;
+  }
+  
+  .animate-scale-in {
+    @apply animate-in zoom-in-95 duration-200;
+  }
+  
+  .animate-slide-up {
+    @apply animate-in slide-in-from-bottom-2 duration-300;
+  }
+
+  /* iOS-style wobble animation for edit mode */
+  @keyframes wobble {
+    0%, 100% { 
+      transform: rotate(-1deg) scale(1.0); 
+    }
+    25% { 
+      transform: rotate(1deg) scale(1.01); 
+    }
+    50% { 
+      transform: rotate(-0.5deg) scale(1.0); 
+    }
+    75% { 
+      transform: rotate(0.5deg) scale(1.01); 
+    }
+  }
+
+  .animate-wobble {
+    animation: wobble 0.5s ease-in-out infinite;
+    transform-origin: center center;
+  }
+
+  /* Dragging state */
+  .dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+
+  .drag-over {
+    border: 2px dashed hsl(var(--primary));
+    background: hsl(var(--primary) / 0.1);
+  }
+
+  /* Sectores Window com peek da seção inferior */
+  .sectors-window {
+    height: 56vh;
+    min-height: 400px;
+    max-height: 600px;
+    position: relative;
+    padding-bottom: 8vh; /* Peek de 8% da próxima seção */
+  }
+
+  /* Scroll controlado - apenas gestos do usuário */
+  .overscroll-none {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Scroll suave respeitando preferências */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Reduzir animações se usuário preferir */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-smooth {
+      scroll-behavior: auto;
+    }
+    
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

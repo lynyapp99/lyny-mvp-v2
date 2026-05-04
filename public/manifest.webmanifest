@@ -1,0 +1,43 @@
+{
+  "name": "Lyny Shadow",
+  "short_name": "Lyny",
+  "description": "Create private timelines to organize and share memories with your loved ones",
+  "version": "2.1.1",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B0B0C",
+  "theme_color": "#E0162B",
+  "icons": [
+    {
+      "src": "/icon-512-shadow.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512-shadow.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["social", "lifestyle", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Go to home screen",
+      "url": "/home",
+      "icons": [{ "src": "/icon-512-shadow.png", "sizes": "512x512" }]
+    },
+    {
+      "name": "Create",
+      "short_name": "Create",
+      "description": "Create new timeline",
+      "url": "/create",
+      "icons": [{ "src": "/icon-512-shadow.png", "sizes": "512x512" }]
+    }
+  ]
+}
