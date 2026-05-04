@@ -72,7 +72,7 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
             <Label htmlFor="sector-name">Nome do Setor</Label>
             <Input
               id="sector-name"
-              placeholder="Ex: Família, Amigos, Projetos..."
+              placeholder="Nome do setor"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="rounded-app"
