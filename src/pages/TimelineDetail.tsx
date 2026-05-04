@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MoreVertical, Plus, Play, Share2 } from "lucide-react";
-import { GlassCard } from "@/components/ui/glass-card";
+import { ArrowLeft, Plus, Play, Share2 } from "lucide-react";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,12 +13,18 @@ import { useToast } from "@/hooks/use-toast";
 import AddContentSheet from "@/components/AddContentSheet";
 import NoteComposer from "@/components/NoteComposer";
 import MediaViewer from "@/components/MediaViewer";
-import InviteMemberModal from "@/components/InviteMemberModal";
 import ShareSheet from "@/components/ShareSheet";
-import EmptyState from "@/components/EmptyState";
-import { Image as ImageIcon } from "lucide-react";
 
 type Upload = { id: string; name: string; progress: number };
+
+const formatFullDate = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString("pt-BR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
 
 const TimelineDetail = () => {
   const { timelineId } = useParams();
@@ -34,34 +39,29 @@ const TimelineDetail = () => {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
-  const [inviteOpen, setInviteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   const timeline = timelineRows.map(timelineFromRow).find((t) => t.id === timelineId);
 
+  // Cronológico ascendente: mais antigo no topo
+  const sortedFeed = useMemo(
+    () => [...feed].sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt)),
+    [feed],
+  );
+  const mediaItems = useMemo(() => sortedFeed.filter((i) => i.kind !== "note"), [sortedFeed]);
+
   if (!timeline) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Timeline não encontrada</h2>
+          <h2 className="font-display text-xl font-semibold mb-2">Timeline não encontrada</h2>
           <Button onClick={() => navigate(-1)}>Voltar</Button>
         </div>
       </div>
     );
   }
-
-  const formatDate = (iso: string) => {
-    const d = new Date(iso);
-    const now = new Date();
-    const diffH = (now.getTime() - d.getTime()) / 36e5;
-    if (diffH < 1) return "Agora";
-    if (diffH < 24) return `${Math.floor(diffH)}h atrás`;
-    const diffD = Math.floor(diffH / 24);
-    if (diffD < 7) return `${diffD}d atrás`;
-    return d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
-  };
 
   const handleUpload = async (files: File[], kind: "photo" | "video") => {
     if (!user || !timelineId) return;
@@ -97,65 +97,61 @@ const TimelineDetail = () => {
     }
   };
 
-  const mediaItems = feed.filter((i) => i.kind !== "note");
-
   return (
     <div className="min-h-screen bg-background pb-32">
-      <GlassCard className="sticky top-0 z-40 border-0 border-b border-border/50">
-        <div className="max-w-md mx-auto px-4 py-4 flex items-center gap-3">
-          <IOSButton
-            variant="ghost"
-            size="icon"
+      {/* Cover header */}
+      <div className="relative w-full h-64 overflow-hidden">
+        {timeline.cover ? (
+          <img src={timeline.cover} alt={timeline.title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-surface-2 to-surface" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
+
+        {/* Top action buttons */}
+        <div
+          className="absolute top-0 left-0 right-0 flex items-center justify-between px-4"
+          style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}
+        >
+          <button
             onClick={() => {
               if ("vibrate" in navigator) navigator.vibrate(10);
               navigate(-1);
             }}
-            className="rounded-xl min-w-[44px] min-h-[44px]"
+            className="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-transform"
             aria-label="Voltar"
           >
-            <ArrowLeft size={20} className="text-muted-foreground" />
-          </IOSButton>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-semibold text-foreground truncate">{timeline.title}</h1>
-            <p className="text-sm text-muted-foreground">{feed.length} itens</p>
-          </div>
-          <IOSButton
-            variant="ghost"
-            size="icon"
-            className="rounded-xl min-w-[44px] min-h-[44px]"
-            onClick={() => { if ("vibrate" in navigator) navigator.vibrate(10); setShareOpen(true); }}
+            <ArrowLeft size={22} />
+          </button>
+          <button
+            onClick={() => {
+              if ("vibrate" in navigator) navigator.vibrate(10);
+              setShareOpen(true);
+            }}
+            className="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-transform"
             aria-label="Compartilhar"
           >
-            <Share2 size={20} className="text-muted-foreground" />
-          </IOSButton>
-          <IOSButton
-            variant="ghost"
-            size="icon"
-            className="rounded-xl min-w-[44px] min-h-[44px]"
-            onClick={() => setInviteOpen(true)}
-            aria-label="Mais opções"
-          >
-            <MoreVertical size={20} className="text-muted-foreground" />
-          </IOSButton>
+            <Share2 size={22} />
+          </button>
         </div>
-      </GlassCard>
 
-      {timeline.cover && (
-        <div className="relative h-48 overflow-hidden">
-          <img src={timeline.cover} alt={timeline.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-4 left-4 right-4">
-            <h2 className="text-white text-xl font-bold mb-1">{timeline.title}</h2>
-            {timeline.subtitle && <p className="text-white/90 text-sm">{timeline.subtitle}</p>}
-          </div>
+        {/* Title */}
+        <div className="absolute bottom-4 left-4 right-4">
+          <h1 className="font-display font-semibold text-white text-3xl leading-tight drop-shadow-lg">
+            {timeline.title}
+          </h1>
+          {timeline.subtitle && (
+            <p className="text-white/80 text-sm mt-1">{timeline.subtitle}</p>
+          )}
         </div>
-      )}
+      </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-4">
+      {/* Body */}
+      <div className="max-w-md mx-auto px-4 pt-6">
         {uploads.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3 mb-5">
             {uploads.map((u) => (
-              <div key={u.id} className="p-3 bg-card rounded-xl border border-border">
+              <div key={u.id} className="p-4 bg-card rounded-app border border-border">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-foreground truncate flex-1">{u.name}</span>
                   <span className="text-xs text-muted-foreground ml-2">{u.progress}%</span>
@@ -166,31 +162,45 @@ const TimelineDetail = () => {
           </div>
         )}
 
-        {feed.length === 0 && uploads.length === 0 && (
-          <EmptyState
-            icon={ImageIcon}
-            title="Nenhuma memória ainda"
-            description="Adicione fotos, vídeos ou notas para começar."
-            actionLabel="Adicionar memória"
-            onAction={() => {
-              if ("vibrate" in navigator) navigator.vibrate(10);
-              setSheetOpen(true);
-            }}
-          />
-        )}
+        {sortedFeed.length === 0 && uploads.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-20 px-6">
+            <h2 className="font-display font-semibold text-xl text-foreground">
+              Nenhuma memória ainda
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+              Toque em + para adicionar a primeira memória
+            </p>
+          </div>
+        ) : (
+          <div className="relative pl-6">
+            {/* Vertical line */}
+            <div
+              className="absolute left-[7px] top-2 bottom-2 w-px bg-border"
+              aria-hidden
+            />
 
-        {feed.map((item) => (
-          <FeedCard
-            key={item.id}
-            item={item}
-            formatDate={formatDate}
-            onOpen={() => {
-              if (item.kind === "note") return;
-              const idx = mediaItems.findIndex((m) => m.id === item.id);
-              if (idx >= 0) setViewerIndex(idx);
-            }}
-          />
-        ))}
+            <ol className="space-y-6">
+              {sortedFeed.map((item) => (
+                <li key={item.id} className="relative">
+                  {/* Dot */}
+                  <span
+                    className="absolute -left-[22px] top-2 w-3 h-3 rounded-full bg-primary ring-4 ring-background"
+                    aria-hidden
+                  />
+
+                  <TimelineMemoryCard
+                    item={item}
+                    onOpen={() => {
+                      if (item.kind === "note") return;
+                      const idx = mediaItems.findIndex((m) => m.id === item.id);
+                      if (idx >= 0) setViewerIndex(idx);
+                    }}
+                  />
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </div>
 
       {/* FAB */}
@@ -199,10 +209,14 @@ const TimelineDetail = () => {
           if ("vibrate" in navigator) navigator.vibrate(10);
           setSheetOpen(true);
         }}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-        aria-label="Adicionar conteúdo"
+        className="fixed z-40 w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center active:scale-95 transition-transform"
+        style={{
+          bottom: "calc(env(safe-area-inset-bottom) + 24px)",
+          right: "24px",
+        }}
+        aria-label="Adicionar memória"
       >
-        <Plus size={26} />
+        <Plus size={28} strokeWidth={2.5} />
       </button>
 
       <AddContentSheet
@@ -233,74 +247,72 @@ const TimelineDetail = () => {
         timelineId={timeline.id}
         timelineTitle={timeline.title}
       />
-
-      <InviteMemberModal
-        isOpen={inviteOpen}
-        onClose={() => setInviteOpen(false)}
-        timelineId={timelineId || ""}
-        timelineName={timeline.title}
-      />
     </div>
   );
 };
 
-const FeedCard = ({
+const TimelineMemoryCard = ({
   item,
-  formatDate,
   onOpen,
 }: {
   item: FeedItem;
-  formatDate: (s: string) => string;
   onOpen: () => void;
 }) => {
+  const dateLabel = formatFullDate(item.createdAt);
+
   if (item.kind === "note") {
     return (
-      <div className="p-4 bg-card rounded-2xl border border-border">
+      <article className="bg-card rounded-app border border-border p-4">
+        <p className="text-xs text-muted-foreground mb-2">{dateLabel}</p>
         <p className="text-foreground whitespace-pre-wrap leading-relaxed">{item.text}</p>
-        <p className="text-xs text-muted-foreground mt-3">{formatDate(item.createdAt)}</p>
-      </div>
+      </article>
     );
   }
 
   return (
-    <button
-      onClick={onOpen}
-      className="block w-full bg-card rounded-2xl border border-border overflow-hidden active:scale-[0.99] transition-transform"
-    >
-      <div className="relative aspect-[4/3] bg-muted">
-        {item.kind === "video" ? (
-          <>
-            <video
-              src={item.mediaUrl ?? undefined}
-              preload="metadata"
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-              <div className="w-14 h-14 rounded-full bg-black/60 flex items-center justify-center">
-                <Play size={26} className="text-white ml-1" fill="white" />
+    <article className="bg-card rounded-app border border-border overflow-hidden">
+      <button
+        onClick={onOpen}
+        className="block w-full text-left active:scale-[0.99] transition-transform"
+        aria-label="Abrir mídia"
+      >
+        <div className="relative w-full bg-muted" style={{ height: 240 }}>
+          {item.kind === "video" ? (
+            <>
+              <video
+                src={item.mediaUrl ?? undefined}
+                preload="metadata"
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+                style={{ borderRadius: "12px 12px 0 0" }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-black/60 flex items-center justify-center">
+                  <Play size={22} className="text-white ml-1" fill="white" />
+                </div>
               </div>
-            </div>
-          </>
-        ) : (
-          <img
-            src={item.mediaUrl ?? undefined}
-            alt=""
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+            </>
+          ) : (
+            <img
+              src={item.mediaUrl ?? undefined}
+              alt=""
+              loading="lazy"
+              className="w-full h-full object-cover"
+              style={{ borderRadius: "12px 12px 0 0" }}
+            />
+          )}
+        </div>
+      </button>
+      <div className="p-4">
+        <p className="text-xs text-muted-foreground">{dateLabel}</p>
+        {item.text && (
+          <p className="text-sm text-foreground mt-3 whitespace-pre-wrap leading-relaxed">
+            {item.text}
+          </p>
         )}
       </div>
-      {item.text && (
-        <div className="p-3 text-left">
-          <p className="text-sm text-foreground">{item.text}</p>
-        </div>
-      )}
-      <div className="px-3 pb-3 text-left">
-        <p className="text-xs text-muted-foreground">{formatDate(item.createdAt)}</p>
-      </div>
-    </button>
+    </article>
   );
 };
 
