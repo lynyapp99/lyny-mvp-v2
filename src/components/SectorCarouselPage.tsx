@@ -118,7 +118,10 @@ const SectorCarouselPage = ({
         {/* Sector Header - Compacto */}
         <div className="mb-2 flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <SectorIcon className="w-7 h-7 text-foreground" strokeWidth={1.75} aria-hidden="true" />
+            {(() => {
+              const SectorIcon = getSectorIcon(sector.emoji);
+              return <SectorIcon className="w-7 h-7 text-foreground" strokeWidth={1.75} aria-hidden="true" />;
+            })()}
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-foreground tracking-tight truncate leading-tight">
                 {sector.name} · {timelines.length} {timelines.length === 1 ? 'timeline' : 'timelines'}
@@ -176,8 +179,11 @@ const SectorCarouselPage = ({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xl" aria-hidden="true">
-                            {sector.emoji}
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground" aria-hidden="true">
+                            {(() => {
+                              const Icon = getSectorIcon(sector.emoji);
+                              return <Icon className="w-5 h-5" strokeWidth={1.75} />;
+                            })()}
                           </div>
                         )}
                       </div>
@@ -211,8 +217,11 @@ const SectorCarouselPage = ({
             </>
           ) : (
             <div className="text-center py-8 px-4" role="status">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted/20 flex items-center justify-center">
-                <span className="text-3xl opacity-40" aria-hidden="true">{sector.emoji}</span>
+              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted/20 flex items-center justify-center text-muted-foreground/60">
+                {(() => {
+                  const Icon = getSectorIcon(sector.emoji);
+                  return <Icon className="w-7 h-7" strokeWidth={1.5} aria-hidden="true" />;
+                })()}
               </div>
               <p className="text-sm font-medium text-foreground/80 mb-1">
                 Este setor ainda não tem timelines
