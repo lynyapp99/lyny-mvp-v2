@@ -183,7 +183,7 @@ const Home = () => {
   const handleSaveTimeline = async (timelineData: Partial<Timeline>) => {
     try {
       await createTimelineMut.mutateAsync({
-        sector_id: selectedSectorForTimeline,
+        sector_id: selectedSectorForTimeline || null,
         title: timelineData.title ?? "Untitled",
         subtitle: timelineData.subtitle,
         cover_url: timelineData.cover,
