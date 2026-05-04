@@ -12,25 +12,35 @@ import PublicProfileView from "@/components/PublicProfileView";
 import SettingsScreen from "@/components/SettingsScreen";
 import HiddenTimelinesAccess from "@/components/HiddenTimelinesAccess";
 import { mockUserProfile, togglePublicProfile } from "@/data/profileData";
-import { mockTimelines } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile, useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
+import { useNavigate } from "react-router-dom";
 
 type ProfileView = "main" | "publicSettings" | "publicPreview" | "settings" | "hiddenAccess";
 
 const Profile = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { data: dbProfile } = useProfile();
+  const { data: timelineRows = [] } = useTimelines();
   const [currentView, setCurrentView] = useState<ProfileView>("main");
-  const [user, setUser] = useState(mockUserProfile);
+  const [profileState, setProfileState] = useState(mockUserProfile);
   const [linkCopied, setLinkCopied] = useState(false);
   const [showHiddenAccess, setShowHiddenAccess] = useState(false);
 
-  const publicTimelines = mockTimelines.filter(timeline => 
-    user.publicProfile.publicTimelineIds.includes(timeline.id)
-  );
+  const allTimelines = timelineRows.map(timelineFromRow);
+  const publicTimelines = allTimelines.filter((t) => t.privacy === "public");
+
+  const displayName = dbProfile?.display_name || dbProfile?.username || user?.email?.split("@")[0] || "You";
+  const avatarUrl = dbProfile?.avatar_url ?? undefined;
+  const bio = dbProfile?.bio ?? "";
 
   const handlePublicProfileToggle = (enabled: boolean) => {
     togglePublicProfile(enabled);
-    setUser({ ...user, publicProfile: { ...user.publicProfile, enabled } });
+    setProfileState({ ...profileState, publicProfile: { ...profileState.publicProfile, enabled } });
     
     if (enabled) {
       toast({
@@ -47,7 +57,7 @@ const Profile = () => {
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(user.publicProfile.shareableLink);
+      await navigator.clipboard.writeText(profileState.publicProfile.shareableLink);
       setLinkCopied(true);
       toast({
         title: "Link copied!",
@@ -61,6 +71,11 @@ const Profile = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth", { replace: true });
   };
 
   const handleHiddenAccessGranted = () => {

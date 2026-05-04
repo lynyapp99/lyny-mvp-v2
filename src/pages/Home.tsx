@@ -497,14 +497,16 @@ const Home = () => {
               <button
                 onClick={() => {
                   if ("vibrate" in navigator) navigator.vibrate(10);
-                  // TODO: Open user menu
+                  navigate("/profile");
                 }}
                 className="focus:outline-none focus:ring-2 focus:ring-accent/60 focus:ring-offset-2 rounded-full"
                 aria-label="Menu do usuário"
               >
                 <Avatar className="h-9 w-9 border border-white/20">
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=felix" alt="Avatar do usuário" />
-                  <AvatarFallback>VC</AvatarFallback>
+                  <AvatarImage src={profile?.avatar_url ?? undefined} alt="Avatar do usuário" />
+                  <AvatarFallback>
+                    {(profile?.display_name || profile?.username || user?.email || "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
               </button>
             </div>
