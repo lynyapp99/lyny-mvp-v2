@@ -1,53 +1,85 @@
-## Context
+# Adicionar conteúdo dentro da timeline (foto, vídeo, nota)
 
-The backend already exists in Lovable Cloud:
-- Tables: `profiles`, `sectors`, `timelines`, `memories`, `memory_media`, `connections`, `connection_requests` — all with RLS
-- Storage bucket: `memories` (public)
-- Trigger `handle_new_user` auto-creates a profile on signup
+Hoje a tela `TimelineDetail` lê de mocks (`@/data/timelineMemories`) e o `AddMemoryFlow` é um wizard antigo de várias etapas que não persiste nada. Vou substituir por um fluxo direto, ligado ao Supabase, dentro da própria timeline.
 
-What's missing: authentication UI and replacing `src/data/mockData.ts` / `profileData.ts` with real Supabase queries.
+## Mudanças no banco
 
-## Plan
+A tabela `memories` ainda não tem campo de tipo. Adiciono um enum `memory_kind` para distinguir nota de mídia:
 
-### 1. Authentication
-- Add `/auth` page with email + password (sign up / sign in) and Google sign-in
-- Create `useAuth` hook wrapping `onAuthStateChange` + `getSession`
-- Protect routes (`/home`, `/profile`, `/create`, etc.) — redirect to `/auth` when signed out
-- Add sign-out action in Profile/Settings
-- Enable auto-confirm email so testing doesn't require inbox access (can disable later)
+```sql
+CREATE TYPE public.memory_kind AS ENUM ('note', 'media');
+ALTER TABLE public.memories
+  ADD COLUMN kind public.memory_kind NOT NULL DEFAULT 'media';
+```
 
-### 2. Replace mock data with real queries
-Build a small data layer (`src/lib/api/`) using `@tanstack/react-query`:
-- `useSectors()` — list/create/update/delete from `sectors`
-- `useTimelines(sectorId?)` — from `timelines`, filtered by sector
-- `useMemories(timelineId)` — from `memories` + joined `memory_media`
-- `useProfile(userId)` — from `profiles`
-- `useConnections()` — from `connections` / `connection_requests`
+`memory_media.kind` (`image` | `video`) já existe e basta para diferenciar foto de vídeo no feed.
 
-Update these screens to consume the hooks instead of `mockData`/`profileData`:
-- `Home.tsx`, `SectorRail.tsx`, `SectorCarouselPage.tsx`
-- `TimelineDetail.tsx`, `TimelineCard.tsx`
-- `Relationships.tsx`
-- `Profile.tsx`, `PublicProfileView.tsx`
+Bucket `memories` já está criado e público. Adiciono policies de Storage para escrita/leitura restritas ao dono (path = `timeline_id/photos/...` ou `timeline_id/videos/...`, primeiro segmento = timeline cujo `user_id = auth.uid()`):
 
-### 3. Media uploads
-- Wire `AddMemoryFlow` to upload images to the `memories` storage bucket, then insert rows into `memories` + `memory_media` with the public URL
+```sql
+CREATE POLICY "Users upload to own timeline folder"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'memories'
+  AND EXISTS (
+    SELECT 1 FROM public.timelines t
+    WHERE t.id::text = (storage.foldername(name))[1]
+      AND t.user_id = auth.uid()
+  )
+);
+-- + policies análogas para SELECT/DELETE no mesmo bucket
+```
 
-### 4. Empty states + seeding
-- Add empty-state UI for new users (no sectors/timelines yet)
-- Optional: a "Create starter sectors" button that inserts a few default sectors so the home screen isn't blank
+## Camada de dados
 
-### 5. Keep mocks as fallback (optional)
-- Leave `mockData.ts` as a reference but stop importing it from screens
+Novo arquivo `src/lib/api/memories.ts` com hooks React Query:
 
-## Technical notes
+- `useTimelineMemories(timelineId)` — `SELECT memories + memory_media` ordenado por `created_at DESC` (mais recente primeiro). Retorna itens normalizados: `{ id, kind: 'note'|'photo'|'video', text, mediaUrl, createdAt }`.
+- `useCreateNote(timelineId)` — insere em `memories` com `kind='note'` e `description=texto`.
+- `useUploadMedia(timelineId)` — para cada arquivo:
+  1. Cria registro em `memories` com `kind='media'`.
+  2. Faz `supabase.storage.from('memories').upload('{timelineId}/photos|videos/{uuid}.{ext}', file)` com callback de progresso.
+  3. Insere em `memory_media` com `kind`, `storage_path`, `public_url`, `user_id`, `memory_id`.
+  4. Em caso de erro, faz rollback (apaga memory criado).
+- Invalida queries `['memories', timelineId]` ao final.
 
-- Auth state: subscribe with `supabase.auth.onAuthStateChange` BEFORE calling `getSession()` to avoid race conditions
-- All queries rely on existing RLS — no new policies needed
-- `connection_requests` already has insert/update/select policies; no schema changes
-- `Profile` table doesn't currently have public/private profile fields (`tagline`, `public_profile_enabled`, `public_timeline_ids`). For now, derive "public" from `timelines.privacy = 'public'` and skip the public-profile-toggle feature, or add a follow-up migration to extend `profiles`
+## UI dentro de `TimelineDetail`
 
-## Out of scope (can do next)
-- Hidden timeline biometric/password gating (needs schema additions)
-- Realtime subscriptions for collaborative timelines
-- Public profile customization beyond what fits in current `profiles` table
+1. **Remover dependências de mock**: tirar imports de `@/data/timelineMemories`, `EmbedCard`, `TimelineMapView`, filtros de comida etc. Manter só o feed real.
+2. **Botão "+" flutuante**: FAB fixo `bottom-6 right-6`, 56×56, cor primária, abre o bottom sheet.
+3. **Bottom sheet** (`AddContentSheet.tsx`, novo): usa `Sheet`/`Drawer` do shadcn, lista 3 opções com ícones grandes (44×44 mínimo, haptic on tap):
+   - Foto → abre `<input type="file" accept="image/*" multiple>`
+   - Vídeo → abre `<input type="file" accept="video/*" multiple>`
+   - Nota → abre tela/modal com `<textarea>` e botão "Salvar"
+4. **Progresso de upload**: lista local de uploads em andamento renderizada no topo do feed; cada item mostra nome do arquivo + barra (`Progress` do shadcn) + % calculado a partir do callback de `XMLHttpRequest` que envolvo no `upload`. Ao finalizar, item somente desaparece quando o `useTimelineMemories` revalida.
+5. **Feed cronológico** (`MemoryFeedItem.tsx`, novo):
+   - **Nota**: card com `description` em texto.
+   - **Foto**: imagem `object-cover`, aspect 4/3, toque abre lightbox.
+   - **Vídeo**: `<video>` com `preload="metadata"` mostrando o primeiro frame + overlay de ícone Play centralizado; toque abre player fullscreen.
+   - Cada card mostra data relativa formatada.
+6. **Fullscreen viewer** (`MediaViewer.tsx`, novo): overlay `fixed inset-0 bg-black z-50`, suporta swipe para fechar e navegação ←/→ entre mídias da timeline. Reusa `ImageLightbox` para fotos quando possível e adiciona `<video controls autoPlay playsInline>` para vídeos.
+
+## Limpeza
+
+- `AddMemoryFlow.tsx` antigo deixa de ser usado dentro de `TimelineDetail`. Verifico outros consumidores e removo se ficar órfão.
+- Removo do `TimelineDetail` os blocos de "Categorias/Filtros", "Marcos" e "Mapa" que dependiam só de mock; podem voltar depois quando houver dados reais.
+
+## Layout do bottom sheet
+
+```text
+┌─────────────────────────────┐
+│  Adicionar à timeline       │
+│                             │
+│  📷  Foto                   │
+│  🎬  Vídeo                  │
+│  📝  Nota                   │
+│                             │
+│        [ Cancelar ]         │
+└─────────────────────────────┘
+```
+
+## Notas
+
+- Mantenho dark theme e alvos de toque ≥44px conforme regras do projeto.
+- Sem autoplay de vídeos no feed; só inicia ao abrir fullscreen.
+- Ordenação puramente por `created_at DESC`, sem agrupamentos.
