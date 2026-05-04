@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sector } from "@/types/timeline";
 import { toast } from "@/hooks/use-toast";
+import { SECTOR_ICON_OPTIONS, getSectorIcon } from "@/lib/sectorIcons";
 
 interface SectorModalProps {
   isOpen: boolean;
@@ -22,17 +23,15 @@ const colorOptions: Array<{ value: Sector["color"]; label: string; class: string
   { value: "orange", label: "Laranja", class: "bg-timeline-orange" },
 ];
 
-const emojiOptions = ["💛", "💕", "🎉", "🏡", "🚀", "💼", "🎨", "🎮", "📚", "✨", "🌟", "🔥"];
-
 const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProps) => {
   const [name, setName] = useState(editingSector?.name || "");
   const [selectedColor, setSelectedColor] = useState<Sector["color"]>(editingSector?.color || "pink");
-  const [selectedEmoji, setSelectedEmoji] = useState(editingSector?.emoji || "💛");
+  const [selectedIcon, setSelectedIcon] = useState(editingSector?.emoji || "folder");
 
   const handleSave = () => {
     if (!name.trim()) {
       toast({
-        title: "Ops! 😊",
+        title: "Nome obrigatório",
         description: "Por favor, dê um nome ao seu setor.",
         variant: "destructive",
       });
@@ -42,20 +41,20 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
     onSave({
       name: name.trim(),
       color: selectedColor,
-      emoji: selectedEmoji,
+      emoji: selectedIcon,
     });
 
     toast({
-      title: "Prontinho! 🎉",
+      title: "Pronto",
       description: editingSector 
         ? "Setor atualizado com sucesso." 
-        : "Setor criado com carinho.",
+        : "Setor criado com sucesso.",
     });
 
     onClose();
     setName("");
     setSelectedColor("pink");
-    setSelectedEmoji("💛");
+    setSelectedIcon("folder");
   };
 
   return (
@@ -82,20 +81,25 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
           <div className="space-y-2">
             <Label>Ícone</Label>
             <div className="grid grid-cols-6 gap-2">
-              {emojiOptions.map((emoji) => (
-                <button
-                  key={emoji}
-                  onClick={() => setSelectedEmoji(emoji)}
-                  className={`
-                    h-12 rounded-app text-2xl transition-lyny
-                    ${selectedEmoji === emoji 
-                      ? "bg-accent scale-110 shadow-md" 
-                      : "bg-muted/50 hover:bg-muted"}
-                  `}
-                >
-                  {emoji}
-                </button>
-              ))}
+              {SECTOR_ICON_OPTIONS.map((opt) => {
+                const Icon = getSectorIcon(opt.value);
+                const isSelected = selectedIcon === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedIcon(opt.value)}
+                    aria-label={opt.label}
+                    className={`h-12 rounded-app flex items-center justify-center transition-lyny ${
+                      isSelected
+                        ? "bg-accent text-accent-foreground scale-110 shadow-md"
+                        : "bg-muted/50 text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" strokeWidth={1.75} />
+                  </button>
+                );
+              })}
             </div>
           </div>
 

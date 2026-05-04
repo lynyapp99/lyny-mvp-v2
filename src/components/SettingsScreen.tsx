@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ArrowLeft, Settings, Bell, Shield, HelpCircle, LogOut, User, Lock } from "lucide-react";
-import { mockUserProfile } from "@/data/profileData";
 import PrivacySecuritySettings from "./PrivacySecuritySettings";
 import HiddenTimelinesAccess from "./HiddenTimelinesAccess";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/lib/api/timelines";
+import { useNavigate } from "react-router-dom";
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -13,41 +15,45 @@ type SettingsView = "main" | "privacy" | "hiddenAccess";
 
 const SettingsScreen = ({ onBack, onPrivacySettings }: SettingsScreenProps) => {
   const [currentView, setCurrentView] = useState<SettingsView>("main");
-  const [user] = useState(mockUserProfile);
+  const { user, signOut } = useAuth();
+  const { data: profile } = useProfile();
+  const navigate = useNavigate();
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "Você";
+  const email = user?.email ?? "";
 
   const settingsItems = [
     {
       icon: User,
-      label: "Account Settings",
-      description: "Manage your account preferences",
-      onClick: () => console.log("Account Settings"),
+      label: "Conta",
+      description: "Gerencie as preferências da sua conta",
+      onClick: () => {},
     },
     {
       icon: Bell,
-      label: "Notifications",
-      description: "Control when and how you're notified",
-      onClick: () => console.log("Notifications"),
+      label: "Notificações",
+      description: "Controle quando e como ser notificado",
+      onClick: () => {},
     },
     {
       icon: Shield,
-      label: "Privacy & Security",
-      description: "Manage your privacy settings",
+      label: "Privacidade e segurança",
+      description: "Gerencie suas configurações de privacidade",
       onClick: () => setCurrentView("privacy"),
     },
     {
       icon: HelpCircle,
-      label: "Help & Support",
-      description: "Get help or contact support",
-      onClick: () => console.log("Help"),
+      label: "Ajuda e suporte",
+      description: "Tire dúvidas ou fale com o suporte",
+      onClick: () => {},
     },
   ];
 
   const advancedItems = [
     {
       icon: Lock,
-      label: "Advanced Security",
-      description: "Access secure storage options",
+      label: "Segurança avançada",
+      description: "Opções de armazenamento seguro",
       onClick: () => setCurrentView("hiddenAccess"),
       isAdvanced: true,
     },
@@ -120,12 +126,12 @@ const SettingsScreen = ({ onBack, onPrivacySettings }: SettingsScreenProps) => {
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
               <span className="text-lg font-semibold text-primary">
-                {user.name.split(' ').map(n => n[0]).join('')}
+                {displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </span>
             </div>
             <div>
-              <div className="font-medium text-foreground">{user.name}</div>
-              <div className="text-sm text-muted-foreground">{user.email}</div>
+              <div className="font-medium text-foreground">{displayName}</div>
+              <div className="text-sm text-muted-foreground">{email}</div>
             </div>
           </div>
         </div>
@@ -201,8 +207,10 @@ const SettingsScreen = ({ onBack, onPrivacySettings }: SettingsScreenProps) => {
         {/* Sign Out */}
         <div className="mt-8 pt-6 border-t border-border">
           <button 
-            onClick={() => {
+            onClick={async () => {
               if ("vibrate" in navigator) navigator.vibrate(20);
+              await signOut();
+              navigate("/auth", { replace: true });
             }}
             className="w-full flex items-center gap-3 p-3 min-h-[64px] rounded-xl hover:bg-destructive/10 active:scale-[0.98] transition-all duration-150 text-left touch-manipulation"
             aria-label="Sair da conta"

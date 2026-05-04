@@ -16,7 +16,7 @@ export interface Relationship {
   canView: string[]; // Member IDs who can view
 }
 
-export const mockRelationships: Relationship[] = [
+export const mockRelationships: Relationship[] = []; const _UNUSED_OLD_MOCK = [
   {
     id: "rel_1",
     name: "Ana & Me",
