@@ -7,6 +7,7 @@ import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RequireAuth } from "@/components/RequireAuth";
 import Auth from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
 import Splash from "./pages/Splash";
 import Home from "./pages/Home";
 import Relationships from "./pages/Relationships";
@@ -33,6 +34,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Splash />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/convite/:eventId" element={<EventInvite />} />
           <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/relationships" element={<RequireAuth><Relationships /></RequireAuth>} />
