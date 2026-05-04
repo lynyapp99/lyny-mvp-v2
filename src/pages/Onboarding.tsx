@@ -2,27 +2,28 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Lock, Layers, Users, type LucideIcon } from "lucide-react";
 
-const SLIDES = [
+const SLIDES: Array<{ title: string; subtitle: string; Icon: LucideIcon }> = [
   {
     title: "Suas memórias, suas regras.",
     subtitle:
       "Um lugar privado para guardar e compartilhar os momentos que realmente importam.",
-    emoji: "🔐",
+    Icon: Lock,
   },
   {
     title: "Organize por timelines",
     subtitle:
       "Crie setores como Família, Viagens ou Projetos e organize suas timelines do jeito que fizer sentido pra você.",
-    emoji: "🗂️",
+    Icon: Layers,
   },
   {
     title: "Só quem você convidar vê",
     subtitle:
       "Sem feed público, sem algoritmo. Você controla quem participa de cada memória.",
-    emoji: "👥",
+    Icon: Users,
   },
-] as const;
+];
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const Onboarding = () => {
           className="w-28 h-28 rounded-app-xl bg-muted/20 border border-border flex items-center justify-center mb-10 transition-all duration-300"
           aria-hidden="true"
         >
-          <span className="text-6xl">{slide.emoji}</span>
+          <slide.Icon className="w-14 h-14 text-accent" strokeWidth={1.5} />
         </div>
 
         <h1 className="text-3xl font-bold tracking-tight mb-4">{slide.title}</h1>
