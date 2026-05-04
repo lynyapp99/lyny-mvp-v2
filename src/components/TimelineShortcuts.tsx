@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Plus, Star, Lock, Circle } from "lucide-react";
-import { Timeline } from "@/data/mockData";
+import { Timeline } from "@/types/timeline";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 

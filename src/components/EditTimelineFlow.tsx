@@ -3,7 +3,7 @@ import { ArrowLeft, Upload, Lock, Users, Star, Archive, Trash2 } from "lucide-re
 import { Button } from "@/components/ui/button";
 import TimelineSelector from "./TimelineSelector";
 import RelationshipSelector from "./RelationshipSelector";
-import { type Timeline } from "@/data/mockData";
+import { type Timeline } from "@/types/timeline";
 import { mockRelationships } from "@/data/relationshipData";
 import { getRelationshipIcon } from "@/lib/relationshipIcons";
 

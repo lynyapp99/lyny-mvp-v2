@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Timeline } from "@/data/mockData";
+import { Timeline } from "@/types/timeline";
 import { toast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
 

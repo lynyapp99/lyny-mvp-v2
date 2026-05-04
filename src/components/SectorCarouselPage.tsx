@@ -1,4 +1,4 @@
-import { Sector, Timeline } from "@/data/mockData";
+import { Sector, Timeline } from "@/types/timeline";
 import { cn } from "@/lib/utils";
 import { Lock, Plus } from "lucide-react";
 import { format } from "date-fns";
