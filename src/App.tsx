@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import { AuthProvider } from "@/hooks/useAuth";
+import { RequireAuth } from "@/components/RequireAuth";
+import Auth from "./pages/Auth";
 import Splash from "./pages/Splash";
 import Home from "./pages/Home";
 import Relationships from "./pages/Relationships";
@@ -22,27 +25,30 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <PWAInstallPrompt />
-      <Routes>
-        <Route path="/" element={<Splash />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/relationships" element={<Relationships />} />
-        <Route path="/create" element={<Create />} />
-        <Route path="/event/create" element={<EventCreate />} />
-        <Route path="/event/:eventId" element={<EventDetail />} />
-        <Route path="/event/:eventId/album" element={<EventAlbum />} />
-        <Route path="/convite/:eventId" element={<EventInvite />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/timeline/:timelineId" element={<TimelineDetail />} />
-        <Route path="/hidden-timelines" element={<HiddenTimelineDemo />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <PWAInstallPrompt />
+        <Routes>
+          <Route path="/" element={<Splash />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/convite/:eventId" element={<EventInvite />} />
+          <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
+          <Route path="/relationships" element={<RequireAuth><Relationships /></RequireAuth>} />
+          <Route path="/create" element={<RequireAuth><Create /></RequireAuth>} />
+          <Route path="/event/create" element={<RequireAuth><EventCreate /></RequireAuth>} />
+          <Route path="/event/:eventId" element={<RequireAuth><EventDetail /></RequireAuth>} />
+          <Route path="/event/:eventId/album" element={<RequireAuth><EventAlbum /></RequireAuth>} />
+          <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
+          <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+          <Route path="/timeline/:timelineId" element={<RequireAuth><TimelineDetail /></RequireAuth>} />
+          <Route path="/hidden-timelines" element={<RequireAuth><HiddenTimelineDemo /></RequireAuth>} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

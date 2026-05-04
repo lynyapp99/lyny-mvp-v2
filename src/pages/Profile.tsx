@@ -12,25 +12,35 @@ import PublicProfileView from "@/components/PublicProfileView";
 import SettingsScreen from "@/components/SettingsScreen";
 import HiddenTimelinesAccess from "@/components/HiddenTimelinesAccess";
 import { mockUserProfile, togglePublicProfile } from "@/data/profileData";
-import { mockTimelines } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile, useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
+import { useNavigate } from "react-router-dom";
 
 type ProfileView = "main" | "publicSettings" | "publicPreview" | "settings" | "hiddenAccess";
 
 const Profile = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { data: dbProfile } = useProfile();
+  const { data: timelineRows = [] } = useTimelines();
   const [currentView, setCurrentView] = useState<ProfileView>("main");
-  const [user, setUser] = useState(mockUserProfile);
+  const [profileState, setProfileState] = useState(mockUserProfile);
   const [linkCopied, setLinkCopied] = useState(false);
   const [showHiddenAccess, setShowHiddenAccess] = useState(false);
 
-  const publicTimelines = mockTimelines.filter(timeline => 
-    user.publicProfile.publicTimelineIds.includes(timeline.id)
-  );
+  const allTimelines = timelineRows.map(timelineFromRow);
+  const publicTimelines = allTimelines.filter((t) => t.privacy === "public");
+
+  const displayName = dbProfile?.display_name || dbProfile?.username || user?.email?.split("@")[0] || "You";
+  const avatarUrl = dbProfile?.avatar_url ?? undefined;
+  const bio = dbProfile?.bio ?? "";
 
   const handlePublicProfileToggle = (enabled: boolean) => {
     togglePublicProfile(enabled);
-    setUser({ ...user, publicProfile: { ...user.publicProfile, enabled } });
+    setProfileState({ ...profileState, publicProfile: { ...profileState.publicProfile, enabled } });
     
     if (enabled) {
       toast({
@@ -47,7 +57,7 @@ const Profile = () => {
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(user.publicProfile.shareableLink);
+      await navigator.clipboard.writeText(profileState.publicProfile.shareableLink);
       setLinkCopied(true);
       toast({
         title: "Link copied!",
@@ -61,6 +71,11 @@ const Profile = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth", { replace: true });
   };
 
   const handleHiddenAccessGranted = () => {
@@ -134,17 +149,17 @@ const Profile = () => {
               <div>
                 <div className="font-semibold text-foreground">Perfil público</div>
                 <div className="text-sm text-muted-foreground">
-                  {user.publicProfile.enabled ? "Visível para outras pessoas" : "Apenas privado"}
+                  {profileState.publicProfile.enabled ? "Visível para outras pessoas" : "Apenas privado"}
                 </div>
               </div>
             </div>
             <Switch
-              checked={user.publicProfile.enabled}
+              checked={profileState.publicProfile.enabled}
               onCheckedChange={handlePublicProfileToggle}
             />
           </div>
           
-          {user.publicProfile.enabled && (
+          {profileState.publicProfile.enabled && (
             <div className="text-xs text-muted-foreground">
               {publicTimelines.length} timeline{publicTimelines.length !== 1 ? 's' : ''} shared publicly
             </div>
@@ -152,22 +167,20 @@ const Profile = () => {
         </GlassCard>
 
         {/* Public Profile Preview */}
-        {user.publicProfile.enabled ? (
+        {profileState.publicProfile.enabled ? (
           <div className="space-y-6">
             {/* Profile Header Preview */}
             <div className="text-center">
               <Avatar className="w-20 h-20 mx-auto mb-4">
-                <AvatarImage src={user.publicProfile.avatar} />
+                <AvatarImage src={avatarUrl} />
                 <AvatarFallback className="text-xl font-semibold bg-primary/10 text-primary">
-                  {user.publicProfile.displayName.split(' ').map(n => n[0]).join('')}
+                  {displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              
-              <h2 className="text-xl font-bold text-foreground">{user.publicProfile.displayName}</h2>
-              
-              {user.publicProfile.bio && (
-                <p className="text-muted-foreground mt-2 px-4">{user.publicProfile.bio}</p>
-              )}
+
+              <h2 className="text-xl font-bold text-foreground">{displayName}</h2>
+              {bio && <p className="text-muted-foreground mt-2 px-4">{bio}</p>}
+              <p className="text-xs text-muted-foreground mt-1">{user?.email}</p>
 
               {/* Public Stats */}
               <div className="flex justify-center gap-6 mt-4">
@@ -332,6 +345,13 @@ const Profile = () => {
             localStorage.setItem('lastTap', String(now));
           }}
         />
+
+        {/* Sign out */}
+        <div className="mt-8">
+          <IOSButton variant="outline" className="w-full" onClick={handleSignOut}>
+            Sign out
+          </IOSButton>
+        </div>
       </div>
 
       <Navigation />

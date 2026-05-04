@@ -26,7 +26,7 @@ const TimelineShortcuts = ({
   isLoading = false,
 }: TimelineShortcutsProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [longPressTimer, setLongPressTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const touchStartPos = useRef({ x: 0, y: 0 });
 
   const handleTouchStart = (e: React.TouchEvent, index: number) => {
