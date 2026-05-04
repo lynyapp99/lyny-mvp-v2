@@ -257,7 +257,7 @@ export type Database = {
           id: string
           is_hidden: boolean
           privacy: Database["public"]["Enums"]["timeline_privacy"]
-          sector_id: string
+          sector_id: string | null
           subtitle: string | null
           tags: string[]
           title: string
@@ -271,7 +271,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           privacy?: Database["public"]["Enums"]["timeline_privacy"]
-          sector_id: string
+          sector_id?: string | null
           subtitle?: string | null
           tags?: string[]
           title: string
@@ -285,7 +285,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           privacy?: Database["public"]["Enums"]["timeline_privacy"]
-          sector_id?: string
+          sector_id?: string | null
           subtitle?: string | null
           tags?: string[]
           title?: string
