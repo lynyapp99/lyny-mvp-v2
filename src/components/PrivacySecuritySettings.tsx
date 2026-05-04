@@ -3,7 +3,6 @@ import { ArrowLeft, Shield, Globe, Eye, EyeOff, Users, Lock } from "lucide-react
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { mockUserProfile, togglePublicProfile } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
 
 interface PrivacySecuritySettingsProps {
@@ -14,36 +13,29 @@ interface PrivacySecuritySettingsProps {
 const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecuritySettingsProps) => {
   const { toast } = useToast();
   const [settings, setSettings] = useState({
-    publicProfileEnabled: mockUserProfile.publicProfile.enabled,
-    allowTimelineSharing: mockUserProfile.privacy.allowTimelineSharing,
-    showMembersInPublic: mockUserProfile.privacy.showMembersInPublic,
+    publicProfileEnabled: false,
+    allowTimelineSharing: true,
+    showMembersInPublic: false,
     twoFactorAuth: false,
     dataDownload: false,
   });
 
   const handlePublicProfileToggle = (enabled: boolean) => {
     setSettings({ ...settings, publicProfileEnabled: enabled });
-    togglePublicProfile(enabled);
-    
-    if (enabled) {
-      toast({
-        title: "Public profile enabled",
-        description: "You can now customize and share your profile.",
-      });
-    } else {
-      toast({
-        title: "Public profile disabled",
-        description: "Your profile is now private and not shareable.",
-      });
-    }
+    toast({
+      title: enabled ? "Perfil público ativado" : "Perfil público desativado",
+      description: enabled
+        ? "Você já pode personalizar e compartilhar seu perfil."
+        : "Seu perfil está privado e não pode ser compartilhado.",
+    });
   };
 
   const privacySettings = [
     {
       id: "publicProfile",
       icon: Globe,
-      title: "Public Profile",
-      description: "Allow others to view your shared timelines",
+      title: "Perfil público",
+      description: "Permitir que outras pessoas vejam suas timelines compartilhadas",
       value: settings.publicProfileEnabled,
       onChange: handlePublicProfileToggle,
       hasManage: true,
@@ -51,16 +43,16 @@ const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecur
     {
       id: "timelineSharing",
       icon: Users,
-      title: "Timeline Sharing",
-      description: "Allow timelines to be shared outside relationships",
+      title: "Compartilhamento de timelines",
+      description: "Permitir compartilhar timelines fora de relacionamentos",
       value: settings.allowTimelineSharing,
       onChange: (value: boolean) => setSettings({ ...settings, allowTimelineSharing: value }),
     },
     {
       id: "showMembers",
       icon: Eye,
-      title: "Show Members Publicly",
-      description: "Display member names in public timeline views",
+      title: "Mostrar membros publicamente",
+      description: "Exibir nomes dos membros nas timelines públicas",
       value: settings.showMembersInPublic,
       onChange: (value: boolean) => setSettings({ ...settings, showMembersInPublic: value }),
       disabled: !settings.publicProfileEnabled,
@@ -71,8 +63,8 @@ const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecur
     {
       id: "twoFactor",
       icon: Shield,
-      title: "Two-Factor Authentication",
-      description: "Add an extra layer of security to your account",
+      title: "Autenticação em dois fatores",
+      description: "Adicione uma camada extra de segurança à sua conta",
       value: settings.twoFactorAuth,
       onChange: (value: boolean) => setSettings({ ...settings, twoFactorAuth: value }),
     },
@@ -82,11 +74,11 @@ const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecur
     {
       id: "dataDownload",
       icon: Shield,
-      title: "Download Your Data",
-      description: "Export all your timelines and memories",
+      title: "Baixar seus dados",
+      description: "Exporte todas as suas timelines e memórias",
       value: false,
       isAction: true,
-      onClick: () => toast({ title: "Data export started", description: "You'll receive an email when ready." }),
+      onClick: () => toast({ title: "Exportação iniciada", description: "Você receberá um e-mail quando estiver pronta." }),
     },
   ];
 
@@ -117,7 +109,7 @@ const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecur
         <div className="space-y-6">
         {/* Privacy Settings */}
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-4">Privacy</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Privacidade</h3>
           <div className="space-y-1">
             {privacySettings.map((setting, index) => {
               const Icon = setting.icon;
@@ -165,7 +157,7 @@ const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecur
 
         {/* Security Settings */}
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-4">Security</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Segurança</h3>
           <div className="space-y-1">
             {securitySettings.map((setting, index) => {
               const Icon = setting.icon;
@@ -195,7 +187,7 @@ const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecur
 
         {/* Data Settings */}
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-4">Your Data</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Seus dados</h3>
           <div className="space-y-1">
             {dataSettings.map((setting, index) => {
               const Icon = setting.icon;
@@ -242,7 +234,7 @@ const PrivacySecuritySettings = ({ onBack, onManagePublicProfile }: PrivacySecur
                 <Lock size={20} className="text-destructive" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-destructive">Excluir Conta</div>
+                <div className="font-medium text-destructive">Excluir conta</div>
                 <div className="text-sm text-destructive/80">Deletar permanentemente sua conta e dados</div>
               </div>
             </div>
