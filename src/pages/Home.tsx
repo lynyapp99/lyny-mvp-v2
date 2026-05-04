@@ -175,8 +175,8 @@ const Home = () => {
     setIsSectorModalOpen(true);
   };
 
-  const handleAddTimeline = (sectorId: string) => {
-    setSelectedSectorForTimeline(sectorId);
+  const handleAddTimeline = (sectorId: string | null) => {
+    setSelectedSectorForTimeline(sectorId ?? "");
     setIsTimelineModalOpen(true);
   };
 
