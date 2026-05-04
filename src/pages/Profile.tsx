@@ -124,8 +124,8 @@ const Profile = () => {
         {/* Header with Settings Gear */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-display text-foreground">Perfil</h1>
-            <p className="text-muted-foreground mt-1">Sua identidade compartilhável</p>
+            <h1 className="font-display font-semibold text-3xl text-foreground">Perfil</h1>
+            <p className="text-muted-foreground mt-1 text-sm">Sua identidade compartilhável</p>
           </div>
           <IOSButton
             variant="ghost"
@@ -134,7 +134,7 @@ const Profile = () => {
             className="rounded-2xl"
             aria-label="Configurações"
           >
-            <Settings size={24} className="text-muted-foreground" />
+            <Settings size={22} className="text-muted-foreground" />
           </IOSButton>
         </div>
 

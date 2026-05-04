@@ -120,11 +120,11 @@ const Create = () => {
               onClick={() => setShowRelationshipSelector(false)}
               className="rounded-xl"
             >
-              <ArrowLeft size={20} className="text-muted-foreground" />
+              <ArrowLeft size={22} className="text-muted-foreground" />
             </IOSButton>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Select Relationship</h1>
-              <p className="text-muted-foreground">Who will share this timeline?</p>
+              <h1 className="font-display font-semibold text-2xl text-foreground">Selecionar relacionamento</h1>
+              <p className="text-muted-foreground text-sm">Quem vai compartilhar essa timeline?</p>
             </div>
           </div>
 
@@ -146,11 +146,11 @@ const Create = () => {
             onClick={handleBackToChoice}
             className="rounded-xl"
           >
-            <ArrowLeft size={20} className="text-muted-foreground" />
+            <ArrowLeft size={22} className="text-muted-foreground" />
           </IOSButton>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">New Timeline</h1>
-            <p className="text-muted-foreground">Create your memory collection</p>
+            <h1 className="font-display font-semibold text-2xl text-foreground">Nova timeline</h1>
+            <p className="text-muted-foreground text-sm">Crie sua coleção de memórias</p>
           </div>
         </div>
         
@@ -158,22 +158,22 @@ const Create = () => {
           {/* Cover Image */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Cover Image (Optional)
+              Imagem de capa (opcional)
             </label>
             <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-              <Upload size={32} className="text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Tap to add cover image</p>
+              <Upload size={22} className="text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Toque para adicionar capa</p>
             </div>
           </div>
           
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Title
+              Título
             </label>
             <input
               type="text"
-              placeholder="e.g., Our Restaurant Adventures"
+              placeholder="ex.: Nossas aventuras gastronômicas"
               value={timelineData.title}
               onChange={(e) => setTimelineData({ ...timelineData, title: e.target.value })}
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
@@ -185,10 +185,10 @@ const Create = () => {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Description
+              Descrição
             </label>
             <textarea
-              placeholder="What kind of memories will you collect here?"
+              placeholder="Que tipo de memórias você vai guardar aqui?"
               value={timelineData.description}
               onChange={(e) => setTimelineData({ ...timelineData, description: e.target.value })}
               rows={3}
@@ -201,7 +201,7 @@ const Create = () => {
           {/* Relationship Selection */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Relationship
+              Relacionamento
             </label>
             <button
               onClick={() => setShowRelationshipSelector(true)}
@@ -209,9 +209,9 @@ const Create = () => {
                        hover:border-primary/30 transition-all duration-200"
             >
               {timelineData.relationshipId ? (
-                <div className="text-foreground">Selected relationship</div>
+                <div className="text-foreground">Relacionamento selecionado</div>
               ) : (
-                <div className="text-muted-foreground">Choose who will share this timeline...</div>
+                <div className="text-muted-foreground">Escolha quem vai compartilhar essa timeline...</div>
               )}
             </button>
           </div>
@@ -219,7 +219,7 @@ const Create = () => {
           {/* Color */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
-              Timeline Color
+              Cor da timeline
             </label>
             <div className="grid grid-cols-3 gap-3">
               {colors.map((color) => (
@@ -241,7 +241,7 @@ const Create = () => {
           {/* Privacy */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
-              Privacy Setting
+              Privacidade
             </label>
             <div className="space-y-2">
               {privacyOptions.map((option) => {
@@ -258,7 +258,7 @@ const Create = () => {
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-muted/50 rounded-lg">
-                        <Icon size={16} />
+                        <Icon size={22} className="text-muted-foreground" />
                       </div>
                       <div>
                         <div className="font-medium text-foreground">{option.label}</div>
@@ -283,12 +283,12 @@ const Create = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-muted/50 rounded-lg">
-                  <Lock size={16} className={timelineData.isHidden ? "text-orange-500" : "text-muted-foreground"} />
+                  <Lock size={22} className={timelineData.isHidden ? "text-primary" : "text-muted-foreground"} />
                 </div>
                 <div className="text-left">
-                  <div className="font-medium text-foreground">Make Hidden Timeline</div>
+                  <div className="font-medium text-foreground">Tornar timeline oculta</div>
                   <div className="text-sm text-muted-foreground">
-                    {timelineData.isHidden ? "Requires authentication to access" : "Timeline will be visible to members"}
+                    {timelineData.isHidden ? "Requer autenticação para acessar" : "Timeline visível para os membros"}
                   </div>
                 </div>
               </div>
@@ -300,7 +300,7 @@ const Create = () => {
             <div className="space-y-4 p-4 bg-muted/30 rounded-2xl border border-orange-500/20">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-3">
-                  Authentication Method
+                  Método de autenticação
                 </label>
                 <div className="space-y-2">
                   <button
@@ -313,11 +313,11 @@ const Create = () => {
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-muted/50 rounded-lg">
-                        <Fingerprint size={16} />
+                        <Fingerprint size={22} className="text-muted-foreground" />
                       </div>
                       <div>
-                        <div className="font-medium text-foreground">Biometric Authentication</div>
-                        <div className="text-sm text-muted-foreground">Use Face ID or Touch ID</div>
+                        <div className="font-medium text-foreground">Autenticação biométrica</div>
+                        <div className="text-sm text-muted-foreground">Usar Face ID ou Touch ID</div>
                       </div>
                     </div>
                   </button>
@@ -332,11 +332,11 @@ const Create = () => {
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-muted/50 rounded-lg">
-                        <Shield size={16} />
+                        <Shield size={22} className="text-muted-foreground" />
                       </div>
                       <div>
-                        <div className="font-medium text-foreground">Password Protection</div>
-                        <div className="text-sm text-muted-foreground">Set a custom password</div>
+                        <div className="font-medium text-foreground">Proteção por senha</div>
+                        <div className="text-sm text-muted-foreground">Defina uma senha personalizada</div>
                       </div>
                     </div>
                   </button>
@@ -347,12 +347,12 @@ const Create = () => {
               {timelineData.authMethod === "password" && (
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Set Password
+                    Definir senha
                   </label>
                   <div className="relative">
                     <input
                       type="password"
-                      placeholder="Enter a secure password"
+                      placeholder="Digite uma senha segura"
                       value={timelineData.password}
                       onChange={(e) => setTimelineData({ ...timelineData, password: e.target.value })}
                       className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
@@ -361,7 +361,7 @@ const Create = () => {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Choose a password you'll remember but others won't guess
+                    Escolha uma senha que você lembre, mas que outros não adivinhem
                   </p>
                 </div>
               )}
@@ -381,7 +381,7 @@ const Create = () => {
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-surface-2 rounded-lg">
                   <Star
-                    size={16}
+                    size={22}
                     className={timelineData.favorite ? "text-primary" : "text-muted-foreground"}
                     fill={timelineData.favorite ? "currentColor" : "none"}
                     strokeWidth={1.75}
@@ -406,7 +406,7 @@ const Create = () => {
               (timelineData.isHidden && timelineData.authMethod === "password" && !timelineData.password.trim())
             }
           >
-            {timelineData.isHidden ? "Create Hidden Timeline" : "Create Timeline"}
+            {timelineData.isHidden ? "Criar timeline oculta" : "Criar timeline"}
           </IOSButton>
         </div>
       </div>

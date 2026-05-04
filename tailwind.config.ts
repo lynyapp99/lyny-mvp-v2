@@ -94,7 +94,8 @@ export default {
         'elevated': 'var(--shadow-elevated, 0 12px 28px 0 rgb(0 0 0 / 0.15), 0 4px 8px 0 rgb(0 0 0 / 0.12))',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
       },
       keyframes: {
         "accordion-down": {
