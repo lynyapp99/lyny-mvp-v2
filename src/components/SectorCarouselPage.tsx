@@ -117,7 +117,7 @@ const SectorCarouselPage = ({
         {/* Sector Header - Compacto */}
         <div className="mb-2 flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="text-3xl" aria-hidden="true">{sector.emoji}</span>
+            <SectorIcon className="w-7 h-7 text-foreground" strokeWidth={1.75} aria-hidden="true" />
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-foreground tracking-tight truncate leading-tight">
                 {sector.name} · {timelines.length} {timelines.length === 1 ? 'timeline' : 'timelines'}
