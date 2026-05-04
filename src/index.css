@@ -5,18 +5,16 @@
 /* Shadow Design System - Dark app-only
 All colors MUST be HSL. */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   :root {
     /* Shadow Base Colors */
     --bg: 240 5% 5%;              /* #0B0B0C */
-    --surface: 240 8% 8%;         /* #121214 */
-    --surface-2: 240 8% 10%;      /* #18181B */
+    --surface: 0 0% 10%;          /* #1A1A1A */
+    --surface-2: 0 0% 12%;        /* #1E1E1E */
     
     /* Text & Icons */
-    --text: 0 0% 100%;            /* #FFFFFF */
-    --text-2: 222 11% 81%;        /* #C9CAD1 */
+    --text: 0 0% 96%;             /* #F5F5F5 */
+    --text-2: 0 0% 62%;           /* #9E9E9E */
     
     /* Dividers */
     --divider: 240 6% 17%;        /* #2A2A2E */
@@ -40,23 +38,23 @@ All colors MUST be HSL. */
     
     /* Sistema Base (Shadow) */
     --background: 240 5% 5%;
-    --foreground: 0 0% 100%;
-    --card: 240 8% 8%;
-    --card-foreground: 0 0% 100%;
-    --popover: 240 8% 8%;
-    --popover-foreground: 0 0% 100%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 96%;
     
     /* Primary = Red accent */
     --primary: 353 87% 48%;
     --primary-foreground: 0 0% 100%;
     
     /* Secondary = Surface-2 */
-    --secondary: 240 8% 10%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 96%;
     
     /* Muted */
-    --muted: 240 8% 10%;
-    --muted-foreground: 222 11% 81%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 62%;
     
     /* Accent (mapped to red) */
     --accent-color: 353 87% 48%;
@@ -68,7 +66,7 @@ All colors MUST be HSL. */
     
     /* Borders & inputs */
     --border: 240 6% 17%;
-    --input: 240 8% 10%;
+    --input: 0 0% 12%;
     --radius: 0.875rem;
     
     /* Chart colors (adjusted for dark) */
@@ -112,8 +110,8 @@ All colors MUST be HSL. */
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.55), 0 8px 10px -6px rgb(0 0 0 / 0.55);
     --shadow-elevated: 0 12px 28px 0 rgb(0 0 0 / 0.45), 0 4px 8px 0 rgb(0 0 0 / 0.4);
     
-    /* Card glow */
-    --card-glow: 0 0 0 1px rgba(224, 22, 43, 0.18);
+    /* Card border (neutral, no red glow) */
+    --card-glow: 0 0 0 1px rgba(255, 255, 255, 0.04);
     
     /* Radius tokens */
     --radius-card: 0.875rem;
@@ -126,7 +124,7 @@ All colors MUST be HSL. */
   
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.6;
     overscroll-behavior-y: none;
