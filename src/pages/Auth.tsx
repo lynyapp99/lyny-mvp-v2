@@ -75,7 +75,7 @@ const Auth = () => {
       <GlassCard className="w-full max-w-sm p-6 border border-border">
         <div className="text-center mb-6">
           <img src="/lyny-logo.png" alt="lyny" className="h-10 w-auto mx-auto mb-3" />
-          <h1 className="text-xl font-bold text-foreground">
+          <h1 className="font-display font-semibold text-2xl text-foreground">
             {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
