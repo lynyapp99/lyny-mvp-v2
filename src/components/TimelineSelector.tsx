@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Search, Clock, Users, Star } from "lucide-react";
-import { mockTimelines, type Timeline } from "@/data/mockData";
+import { type Timeline } from "@/types/timeline";
+import { useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
 
 interface TimelineSelectorProps {
   selectedTimelineId?: string;
@@ -14,8 +16,10 @@ const TimelineSelector = ({
   placeholder = "Select a timeline..." 
 }: TimelineSelectorProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const filteredTimelines = mockTimelines.filter(timeline =>
+  const { data: timelineRows = [] } = useTimelines();
+  const allTimelines = timelineRows.map(timelineFromRow);
+
+  const filteredTimelines = allTimelines.filter(timeline =>
     timeline.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     timeline.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
   );

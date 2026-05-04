@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Search, Filter, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { mockSectors } from "@/data/mockData";
+import { useSectors } from "@/lib/api/timelines";
 
 interface SearchBarProps {
   searchQuery: string;
@@ -18,6 +18,7 @@ export interface SearchFilters {
 }
 
 const SearchBar = ({ searchQuery, onSearchChange, onFilterChange }: SearchBarProps) => {
+  const { data: sectorRows = [] } = useSectors();
   const [filters, setFilters] = useState<SearchFilters>({
     sectors: [],
     dateRange: "all",
@@ -100,7 +101,7 @@ const SearchBar = ({ searchQuery, onSearchChange, onFilterChange }: SearchBarPro
               <div>
                 <h3 className="font-semibold mb-3">Setores</h3>
                 <div className="flex flex-wrap gap-2">
-                  {mockSectors.map((sector) => (
+                  {sectorRows.map((sector) => (
                     <button
                       key={sector.id}
                       onClick={() => {
