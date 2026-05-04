@@ -130,6 +130,13 @@ All colors MUST be HSL. */
     overscroll-behavior-y: none;
   }
 
+  /* Screen titles default to Playfair Display */
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
   /* Smooth scrolling & touch optimization */
   html {
     scroll-behavior: smooth;
