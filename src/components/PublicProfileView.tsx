@@ -1,9 +1,10 @@
-import { ArrowLeft, ExternalLink, Users, Calendar } from "lucide-react";
+import { ArrowLeft, ExternalLink, Users, Calendar, Heart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { mockUserProfile } from "@/data/profileData";
 import { useTimelines } from "@/lib/api/timelines";
 import { timelineFromRow } from "@/lib/api/adapters";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/lib/api/timelines";
 
 interface PublicProfileViewProps {
   onBack?: () => void;
@@ -11,15 +12,20 @@ interface PublicProfileViewProps {
 }
 
 const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps) => {
-  const profile = mockUserProfile.publicProfile;
+  const { user } = useAuth();
+  const { data: dbProfile } = useProfile();
+  const profile = {
+    displayName: dbProfile?.display_name || dbProfile?.username || user?.email?.split("@")[0] || "Você",
+    bio: dbProfile?.bio || "",
+    avatar: dbProfile?.avatar_url || "",
+  };
   const { data: timelineRows = [] } = useTimelines();
-  // Get public timelines
-  const publicTimelines = timelineRows.map(timelineFromRow).filter(timeline => 
-    profile.publicTimelineIds.includes(timeline.id)
-  );
+  const publicTimelines = timelineRows
+    .map(timelineFromRow)
+    .filter((timeline) => timeline.privacy === "public");
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
       month: 'short',
       year: 'numeric'
     });
@@ -37,9 +43,9 @@ const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps
                 className="flex items-center gap-2 p-2 hover:bg-muted rounded-xl transition-colors"
               >
                 <ArrowLeft size={20} className="text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Back to Settings</span>
+                <span className="text-sm text-muted-foreground">Voltar</span>
               </button>
-              <span className="text-sm font-medium text-primary">Preview Mode</span>
+              <span className="text-sm font-medium text-primary">Pré-visualização</span>
             </div>
           </div>
         </div>
@@ -65,13 +71,13 @@ const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps
           <div className="flex justify-center gap-6">
             <div className="text-center">
               <div className="text-lg font-semibold text-primary">{publicTimelines.length}</div>
-              <div className="text-xs text-muted-foreground">Public Timelines</div>
+              <div className="text-xs text-muted-foreground">Timelines públicas</div>
             </div>
             <div className="text-center">
               <div className="text-lg font-semibold text-primary">
                 {publicTimelines.reduce((sum, timeline) => sum + timeline.items, 0)}
               </div>
-              <div className="text-xs text-muted-foreground">Shared Memories</div>
+              <div className="text-xs text-muted-foreground">Memórias compartilhadas</div>
             </div>
           </div>
         </div>
@@ -79,7 +85,7 @@ const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps
         {/* Public Timelines Grid */}
         {publicTimelines.length > 0 ? (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Shared Timelines</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Timelines compartilhadas</h2>
             
             <div className="grid gap-4">
               {publicTimelines.map((timeline) => (
@@ -125,7 +131,7 @@ const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps
                       <div className="flex items-center gap-4 text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Users size={14} />
-                          {timeline.members} {timeline.members === 1 ? 'member' : 'members'}
+                          {timeline.members} {timeline.members === 1 ? 'membro' : 'membros'}
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar size={14} />
@@ -134,7 +140,7 @@ const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps
                       </div>
                       
                       <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        {timeline.items} memories
+                        {timeline.items} memórias
                       </span>
                     </div>
                   </div>
@@ -147,17 +153,17 @@ const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps
             <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <ExternalLink size={24} className="text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">No Public Timelines</h3>
+            <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma timeline pública</h3>
             <p className="text-muted-foreground text-sm px-4">
-              {profile.displayName} hasn't shared any timelines publicly yet.
+              {profile.displayName} ainda não compartilhou timelines publicamente.
             </p>
           </div>
         )}
 
         {/* Footer */}
         <div className="text-center mt-12 pt-8 border-t border-border">
-          <p className="text-xs text-muted-foreground">
-            Shared with ❤️ on Lyny
+          <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+            Feito com <Heart size={12} className="text-accent fill-accent" /> no Lyny
           </p>
         </div>
       </div>
