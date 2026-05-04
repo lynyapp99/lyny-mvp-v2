@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MoreVertical, Plus, Play, Camera, Share2 } from "lucide-react";
+import { ArrowLeft, MoreVertical, Plus, Play, Share2 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
