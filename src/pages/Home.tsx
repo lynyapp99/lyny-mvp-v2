@@ -18,7 +18,7 @@ import CarouselDots from "@/components/CarouselDots";
 import SectorModal from "@/components/SectorModal";
 import TimelineModal from "@/components/TimelineModal";
 import { Button } from "@/components/ui/button";
-import { Plus, Menu } from "lucide-react";
+import { Plus, Menu, Search, Smartphone } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import EditModeButton from "@/components/EditModeButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -154,7 +154,7 @@ const Home = () => {
   const handleSaveSector = async (sectorData: Omit<Sector, "id" | "members" | "timelineIds">) => {
     try {
       if (editingSector) {
-        toast({ title: "Editing not yet wired", description: "Coming soon — for now create a new sector." });
+        toast({ title: "Edição em breve", description: "Por enquanto crie um novo setor." });
       } else {
         await createSector.mutateAsync({
           name: sectorData.name,
@@ -164,7 +164,7 @@ const Home = () => {
         setTimeout(() => scrollToSector(sectors.length), 100);
       }
     } catch (e: unknown) {
-      toast({ title: "Could not save sector", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+      toast({ title: "Não foi possível salvar o setor", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     } finally {
       setEditingSector(null);
     }
@@ -191,7 +191,7 @@ const Home = () => {
     if (input.newSectorName) {
       const created = await createSector.mutateAsync({
         name: input.newSectorName,
-        emoji: "📁",
+        emoji: "folder",
         color: "blue",
       });
       sectorId = created.id;
@@ -469,7 +469,7 @@ const Home = () => {
           ) : (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔍</span>
+                <Search className="w-6 h-6 text-muted-foreground" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">Nenhum Resultado Encontrado</h3>
               <p className="text-muted-foreground text-sm">
@@ -537,7 +537,7 @@ const Home = () => {
         {sectors.length === 0 && allTimelines.length === 0 ? (
           <div className="max-w-md mx-auto flex flex-col items-center justify-center py-20 px-6 text-center">
             <div className="w-24 h-24 rounded-app-xl bg-muted/30 flex items-center justify-center mb-6">
-              <span className="text-5xl">📱</span>
+              <Smartphone className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <h2 className="text-[22px] font-semibold text-foreground mb-3">
               Comece sua jornada
