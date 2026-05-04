@@ -172,17 +172,15 @@ const Profile = () => {
             {/* Profile Header Preview */}
             <div className="text-center">
               <Avatar className="w-20 h-20 mx-auto mb-4">
-                <AvatarImage src={profileState.publicProfile.avatar} />
+                <AvatarImage src={avatarUrl} />
                 <AvatarFallback className="text-xl font-semibold bg-primary/10 text-primary">
-                  {profileState.publicProfile.displayName.split(' ').map(n => n[0]).join('')}
+                  {displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              
-              <h2 className="text-xl font-bold text-foreground">{profileState.publicProfile.displayName}</h2>
-              
-              {profileState.publicProfile.bio && (
-                <p className="text-muted-foreground mt-2 px-4">{profileState.publicProfile.bio}</p>
-              )}
+
+              <h2 className="text-xl font-bold text-foreground">{displayName}</h2>
+              {bio && <p className="text-muted-foreground mt-2 px-4">{bio}</p>}
+              <p className="text-xs text-muted-foreground mt-1">{user?.email}</p>
 
               {/* Public Stats */}
               <div className="flex justify-center gap-6 mt-4">
@@ -347,6 +345,13 @@ const Profile = () => {
             localStorage.setItem('lastTap', String(now));
           }}
         />
+
+        {/* Sign out */}
+        <div className="mt-8">
+          <IOSButton variant="outline" className="w-full" onClick={handleSignOut}>
+            Sign out
+          </IOSButton>
+        </div>
       </div>
 
       <Navigation />
