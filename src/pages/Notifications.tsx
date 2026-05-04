@@ -6,8 +6,8 @@ const Notifications = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Notificações</h1>
+        <div className="mb-5">
+          <h1 className="font-display font-semibold text-3xl text-foreground">Notificações</h1>
         </div>
 
         <EmptyState
