@@ -8,7 +8,7 @@ import SettingsScreen from "@/components/SettingsScreen";
 import { useHiddenTimelineSession } from "@/hooks/useHiddenTimelineSession";
 import { GlassCard } from "@/components/ui/glass-card";
 import RecentAndFavorites from "@/components/RecentAndFavorites";
-import type { Timeline, Sector } from "@/data/mockData";
+import type { Timeline, Sector } from "@/types/timeline";
 import { useSectors, useTimelines, useCreateSector, useDeleteSector, useCreateTimeline } from "@/lib/api/timelines";
 import { buildSectorsWithTimelines } from "@/lib/api/adapters";
 import { useProfile } from "@/lib/api/timelines";
@@ -24,6 +24,7 @@ import EditModeButton from "@/components/EditModeButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TimelineShortcuts from "@/components/TimelineShortcuts";
 import AddShortcutModal from "@/components/AddShortcutModal";
+import TimelineCard from "@/components/TimelineCard";
 import AddSectorCard from "@/components/AddSectorCard";
 import {
   Sheet,
