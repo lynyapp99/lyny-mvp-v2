@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MoreVertical, Plus, Play, Camera } from "lucide-react";
+import { ArrowLeft, MoreVertical, Plus, Play, Camera, Share2 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import AddContentSheet from "@/components/AddContentSheet";
 import NoteComposer from "@/components/NoteComposer";
 import MediaViewer from "@/components/MediaViewer";
 import InviteMemberModal from "@/components/InviteMemberModal";
+import ShareSheet from "@/components/ShareSheet";
 
 type Upload = { id: string; name: string; progress: number };
 
@@ -32,6 +33,7 @@ const TimelineDetail = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
@@ -115,6 +117,15 @@ const TimelineDetail = () => {
             <h1 className="text-lg font-semibold text-foreground truncate">{timeline.title}</h1>
             <p className="text-sm text-muted-foreground">{feed.length} itens</p>
           </div>
+          <IOSButton
+            variant="ghost"
+            size="icon"
+            className="rounded-xl min-w-[44px] min-h-[44px]"
+            onClick={() => { if ("vibrate" in navigator) navigator.vibrate(10); setShareOpen(true); }}
+            aria-label="Compartilhar"
+          >
+            <Share2 size={20} className="text-muted-foreground" />
+          </IOSButton>
           <IOSButton
             variant="ghost"
             size="icon"
@@ -212,6 +223,13 @@ const TimelineDetail = () => {
           onNavigate={setViewerIndex}
         />
       )}
+
+      <ShareSheet
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        timelineId={timeline.id}
+        timelineTitle={timeline.title}
+      />
 
       <InviteMemberModal
         isOpen={inviteOpen}
