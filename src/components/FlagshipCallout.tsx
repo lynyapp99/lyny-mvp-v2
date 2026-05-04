@@ -13,21 +13,21 @@ const FlagshipCallout = ({ onViewTimeline }: FlagshipCalloutProps) => {
           <Star size={20} className="text-primary" />
         </div>
         <div>
-          <h3 className="font-semibold text-primary">Featured Timeline</h3>
-          <p className="text-xs text-primary/80">Perfect example of shared memories</p>
+          <h3 className="font-semibold text-primary">Timeline em destaque</h3>
+          <p className="text-xs text-primary/80">Exemplo de memórias compartilhadas</p>
         </div>
       </div>
       
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="font-medium text-foreground">Our Restaurant Adventures</h4>
+          <h4 className="font-medium text-foreground">Nossas aventuras gastronômicas</h4>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Users size={14} />
-              2 members
+              2 membros
             </span>
-            <span>138 memories</span>
-            <span>Featured couple timeline</span>
+            <span>138 memórias</span>
+            <span>Timeline de casal em destaque</span>
           </div>
         </div>
         
@@ -38,7 +38,7 @@ const FlagshipCallout = ({ onViewTimeline }: FlagshipCalloutProps) => {
             onClick={onViewTimeline}
             className="flex items-center gap-2 text-primary hover:text-primary"
           >
-            View
+            Ver
             <ArrowRight size={14} />
           </Button>
         )}

@@ -44,14 +44,14 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast({ title: "Welcome!", description: "Account created. Signing you in…" });
+        toast({ title: "Bem-vindo!", description: "Conta criada. Entrando…" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Authentication failed";
-      toast({ title: "Error", description: message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : "Falha na autenticação";
+      toast({ title: "Erro", description: message, variant: "destructive" });
     } finally {
       setBusy(false);
     }
@@ -62,8 +62,8 @@ const Auth = () => {
     try {
       const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + from });
       if (result.error) {
-        const message = result.error instanceof Error ? result.error.message : "Google sign-in failed";
-        toast({ title: "Error", description: message, variant: "destructive" });
+        const message = result.error instanceof Error ? result.error.message : "Falha ao entrar com Google";
+        toast({ title: "Erro", description: message, variant: "destructive" });
       }
     } finally {
       setBusy(false);
@@ -76,40 +76,40 @@ const Auth = () => {
         <div className="text-center mb-6">
           <img src="/lyny-logo.png" alt="lyny" className="h-10 w-auto mx-auto mb-3" />
           <h1 className="text-xl font-bold text-foreground">
-            {mode === "signin" ? "Welcome back" : "Create your account"}
+            {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {mode === "signin" ? "Sign in to your timelines" : "Start collecting your memories"}
+            {mode === "signin" ? "Entre nas suas timelines" : "Comece a guardar suas memórias"}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           {mode === "signup" && (
             <div>
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="yourname" autoComplete="username" />
+              <Label htmlFor="username">Nome de usuário</Label>
+              <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="seunome" autoComplete="username" />
             </div>
           )}
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-mail</Label>
             <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
           </div>
           <div>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Senha</Label>
             <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} />
           </div>
           <Button type="submit" className="w-full" disabled={busy}>
-            {busy ? "…" : mode === "signin" ? "Sign in" : "Sign up"}
+            {busy ? "…" : mode === "signin" ? "Entrar" : "Cadastrar"}
           </Button>
         </form>
 
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
-          <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">or</span></div>
+          <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">ou</span></div>
         </div>
 
         <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={busy}>
-          Continue with Google
+          Continuar com Google
         </Button>
 
         <button
@@ -117,7 +117,7 @@ const Auth = () => {
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
           className="w-full text-sm text-muted-foreground hover:text-foreground mt-4"
         >
-          {mode === "signin" ? "No account? Sign up" : "Have an account? Sign in"}
+          {mode === "signin" ? "Não tem conta? Cadastre-se" : "Já tem conta? Entrar"}
         </button>
       </GlassCard>
     </div>
