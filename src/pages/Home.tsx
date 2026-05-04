@@ -180,19 +180,31 @@ const Home = () => {
     setIsTimelineModalOpen(true);
   };
 
-  const handleSaveTimeline = async (timelineData: Partial<Timeline>) => {
-    try {
-      await createTimelineMut.mutateAsync({
-        sector_id: selectedSectorForTimeline || null,
-        title: timelineData.title ?? "Untitled",
-        subtitle: timelineData.subtitle,
-        cover_url: timelineData.cover,
-        privacy: timelineData.privacy,
+  const handleSaveTimeline = async (input: {
+    title: string;
+    subtitle: string;
+    sectorId: string | null;
+    newSectorName?: string;
+    coverUrl?: string;
+  }) => {
+    let sectorId = input.sectorId;
+    if (input.newSectorName) {
+      const created = await createSector.mutateAsync({
+        name: input.newSectorName,
+        emoji: "📁",
+        color: "blue",
       });
-      toast({ title: "Timeline created" });
-    } catch (e: unknown) {
-      toast({ title: "Could not create timeline", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+      sectorId = created.id;
     }
+    const created = await createTimelineMut.mutateAsync({
+      sector_id: sectorId,
+      title: input.title,
+      subtitle: input.subtitle || undefined,
+      cover_url: input.coverUrl,
+      privacy: "private",
+    });
+    toast({ title: "Timeline criada" });
+    navigate(`/timeline/${created.id}`);
   };
 
   // Get filtered timelines
@@ -758,7 +770,8 @@ const Home = () => {
         isOpen={isTimelineModalOpen}
         onClose={() => setIsTimelineModalOpen(false)}
         onSave={handleSaveTimeline}
-        sectorId={selectedSectorForTimeline}
+        sectors={sectors}
+        defaultSectorId={selectedSectorForTimeline || null}
       />
 
       {/* Hidden Timeline Authentication Modal */}
