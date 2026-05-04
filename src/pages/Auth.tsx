@@ -23,7 +23,8 @@ const Auth = () => {
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const from = (location.state as { from?: string } | null)?.from || "/home";
+  const redirectParam = searchParams.get("redirect");
+  const from = redirectParam || (location.state as { from?: string } | null)?.from || "/home";
 
   useEffect(() => {
     if (session) navigate(from, { replace: true });
@@ -38,7 +39,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/home`,
+            emailRedirectTo: `${window.location.origin}${from}`,
             data: { username: username || email.split("@")[0], display_name: username || email.split("@")[0] },
           },
         });
@@ -59,7 +60,7 @@ const Auth = () => {
   const handleGoogle = async () => {
     setBusy(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/home" });
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + from });
       if (result.error) {
         const message = result.error instanceof Error ? result.error.message : "Google sign-in failed";
         toast({ title: "Error", description: message, variant: "destructive" });
