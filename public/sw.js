@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'lyny-shadow-v2.1.1';
+const CACHE_VERSION = 'lyny-shadow-v2.2.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -14,7 +14,7 @@ const STATIC_ASSETS = [
 
 // Install event - pre-cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker Shadow v2.1.1...');
+  console.log('[SW] Installing service worker Shadow v2.2.0...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
