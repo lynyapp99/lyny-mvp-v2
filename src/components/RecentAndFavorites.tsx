@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Clock, Heart, Grid3x3, List, Lock, Users, Calendar, Shield, MoreVertical } from "lucide-react";
-import { Timeline, getRecentTimelines, getFavoriteTimelines, mockTimelines } from "@/data/mockData";
+import { Timeline } from "@/types/timeline";
+import { useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
 import { cn } from "@/lib/utils";
 
 interface RecentAndFavoritesProps {
@@ -24,9 +26,13 @@ const RecentAndFavorites = ({ onTimelineClick, onFavoriteToggle }: RecentAndFavo
     localStorage.setItem("timeline-view-mode", viewMode);
   }, [viewMode]);
   
-  const recentTimelines = getRecentTimelines(10);
-  const favoriteTimelines = getFavoriteTimelines();
-  const protectedTimelines = mockTimelines.filter(t => t.isHidden);
+  const { data: timelineRows = [] } = useTimelines();
+  const allTimelines = timelineRows.map(timelineFromRow);
+  const recentTimelines = [...allTimelines]
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 10);
+  const favoriteTimelines = allTimelines.filter(t => t.favorite);
+  const protectedTimelines = allTimelines.filter(t => t.isHidden);
   
   // Filter timelines based on active filter
   const getFilteredTimelines = (): Timeline[] => {
@@ -38,7 +44,7 @@ const RecentAndFavorites = ({ onTimelineClick, onFavoriteToggle }: RecentAndFavo
       case "protected":
         return protectedTimelines;
       default:
-        return mockTimelines;
+        return allTimelines;
     }
   };
   
@@ -222,7 +228,7 @@ const RecentAndFavorites = ({ onTimelineClick, onFavoriteToggle }: RecentAndFavo
               {filters.map((filter) => {
                 const Icon = filter.icon;
                 const count = filter.id === "all" 
-                  ? mockTimelines.length
+                  ? allTimelines.length
                   : filter.id === "recent"
                   ? recentTimelines.length
                   : filter.id === "favorites"

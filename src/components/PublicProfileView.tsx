@@ -2,7 +2,8 @@ import { ArrowLeft, ExternalLink, Users, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { mockUserProfile } from "@/data/profileData";
-import { mockTimelines } from "@/data/mockData";
+import { useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
 
 interface PublicProfileViewProps {
   onBack?: () => void;
@@ -11,9 +12,9 @@ interface PublicProfileViewProps {
 
 const PublicProfileView = ({ onBack, isPreview = false }: PublicProfileViewProps) => {
   const profile = mockUserProfile.publicProfile;
-  
+  const { data: timelineRows = [] } = useTimelines();
   // Get public timelines
-  const publicTimelines = mockTimelines.filter(timeline => 
+  const publicTimelines = timelineRows.map(timelineFromRow).filter(timeline => 
     profile.publicTimelineIds.includes(timeline.id)
   );
 

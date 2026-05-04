@@ -3,18 +3,19 @@ import Navigation from "@/components/Navigation";
 import TimelineCard from "@/components/TimelineCard";
 import HiddenTimelineAuth from "@/components/HiddenTimelineAuth";
 import { useHiddenTimelineSession } from "@/hooks/useHiddenTimelineSession";
-import { mockTimelines } from "@/data/mockData";
+import { useTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
 import { ArrowLeft } from "lucide-react";
 
 const HiddenTimelineDemo = () => {
   const [authTimelineId, setAuthTimelineId] = useState<string | null>(null);
   const { unlockTimeline, isTimelineUnlocked } = useHiddenTimelineSession();
-
-  // Get the hidden timelines from mockData
-  const hiddenTimelines = mockTimelines.filter(timeline => timeline.isHidden);
+  const { data: timelineRows = [] } = useTimelines();
+  const allTimelines = timelineRows.map(timelineFromRow);
+  const hiddenTimelines = allTimelines.filter(timeline => timeline.isHidden);
 
   const handleTimelineClick = (timelineId: string) => {
-    const timeline = mockTimelines.find(t => t.id === timelineId);
+    const timeline = allTimelines.find(t => t.id === timelineId);
     
     if (timeline?.isHidden && !isTimelineUnlocked(timelineId)) {
       setAuthTimelineId(timelineId);
@@ -28,7 +29,7 @@ const HiddenTimelineDemo = () => {
   const handleAuthSuccess = () => {
     if (authTimelineId) {
       unlockTimeline(authTimelineId);
-      const timeline = mockTimelines.find(t => t.id === authTimelineId);
+      const timeline = allTimelines.find(t => t.id === authTimelineId);
       alert(`Successfully unlocked: ${timeline?.title}`);
       setAuthTimelineId(null);
     }
@@ -119,7 +120,7 @@ const HiddenTimelineDemo = () => {
       {authTimelineId && (
         <HiddenTimelineAuth
           authMethod={
-            mockTimelines.find(t => t.id === authTimelineId)?.authMethod || "biometric"
+            allTimelines.find(t => t.id === authTimelineId)?.authMethod || "biometric"
           }
           onSuccess={handleAuthSuccess}
           onCancel={handleAuthCancel}
