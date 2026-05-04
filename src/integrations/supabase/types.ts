@@ -98,6 +98,7 @@ export type Database = {
           description: string | null
           event_date: string | null
           id: string
+          kind: Database["public"]["Enums"]["memory_kind"]
           location: string | null
           timeline_id: string
           title: string | null
@@ -109,6 +110,7 @@ export type Database = {
           description?: string | null
           event_date?: string | null
           id?: string
+          kind?: Database["public"]["Enums"]["memory_kind"]
           location?: string | null
           timeline_id: string
           title?: string | null
@@ -120,6 +122,7 @@ export type Database = {
           description?: string | null
           event_date?: string | null
           id?: string
+          kind?: Database["public"]["Enums"]["memory_kind"]
           location?: string | null
           timeline_id?: string
           title?: string | null
@@ -311,6 +314,7 @@ export type Database = {
     }
     Enums: {
       media_kind: "image" | "video"
+      memory_kind: "note" | "media"
       sector_color: "pink" | "blue" | "green" | "purple" | "orange" | "yellow"
       timeline_privacy: "private" | "shared" | "public"
     }
@@ -441,6 +445,7 @@ export const Constants = {
   public: {
     Enums: {
       media_kind: ["image", "video"],
+      memory_kind: ["note", "media"],
       sector_color: ["pink", "blue", "green", "purple", "orange", "yellow"],
       timeline_privacy: ["private", "shared", "public"],
     },
