@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, Settings, Bell, Shield, HelpCircle, LogOut, User, Lock } from "lucide-react";
+import { ArrowLeft, Settings, Bell, Shield, HelpCircle, LogOut, User, Lock, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
 import PrivacySecuritySettings from "./PrivacySecuritySettings";
 import HiddenTimelinesAccess from "./HiddenTimelinesAccess";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +17,7 @@ type SettingsView = "main" | "privacy" | "hiddenAccess";
 const SettingsScreen = ({ onBack, onPrivacySettings }: SettingsScreenProps) => {
   const [currentView, setCurrentView] = useState<SettingsView>("main");
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
   const { data: profile } = useProfile();
   const navigate = useNavigate();
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
@@ -202,6 +204,60 @@ const SettingsScreen = ({ onBack, onPrivacySettings }: SettingsScreenProps) => {
               })}
             </div>
           )}
+        </div>
+
+        {/* Theme Toggle */}
+        <div className="mb-8">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3 px-1">
+            Aparência
+          </div>
+          <div className="p-4 bg-card rounded-app border border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-muted/50 rounded-lg flex-shrink-0">
+                {theme === "light" ? (
+                  <Sun size={22} className="text-muted-foreground" />
+                ) : (
+                  <Moon size={22} className="text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-foreground">Tema</div>
+                <div className="text-sm text-muted-foreground">Escolha entre escuro e claro</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  if ("vibrate" in navigator) navigator.vibrate(10);
+                  setTheme("dark");
+                }}
+                className={`flex items-center justify-center gap-2 py-3 rounded-app border transition-all ${
+                  theme === "dark"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-transparent text-foreground border-border hover:bg-muted/40"
+                }`}
+                aria-pressed={theme === "dark"}
+              >
+                <Moon size={18} />
+                <span className="text-sm font-medium">Escuro</span>
+              </button>
+              <button
+                onClick={() => {
+                  if ("vibrate" in navigator) navigator.vibrate(10);
+                  setTheme("light");
+                }}
+                className={`flex items-center justify-center gap-2 py-3 rounded-app border transition-all ${
+                  theme === "light"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-transparent text-foreground border-border hover:bg-muted/40"
+                }`}
+                aria-pressed={theme === "light"}
+              >
+                <Sun size={18} />
+                <span className="text-sm font-medium">Claro</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Sign Out */}
