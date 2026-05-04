@@ -1,18 +1,26 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Splash = () => {
   const navigate = useNavigate();
+  const { session, loading } = useAuth();
 
   useEffect(() => {
-    // Navegar para Home após 2 segundos
+    if (loading) return;
     const timer = setTimeout(() => {
-      navigate("/home");
-    }, 2000);
+      if (session) {
+        navigate("/home", { replace: true });
+      } else if (localStorage.getItem("onboarding_seen")) {
+        navigate("/auth", { replace: true });
+      } else {
+        navigate("/onboarding", { replace: true });
+      }
+    }, 1200);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, session, loading]);
 
   return (
     <div className="min-h-screen bg-lyny-1 flex flex-col items-center justify-center px-4 animate-fade-in">
