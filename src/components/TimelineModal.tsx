@@ -222,7 +222,7 @@ const TimelineModal = ({
                 <SelectItem value={NO_SECTOR}>Sem setor</SelectItem>
                 {sectors.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.emoji} {s.name}
+                    {s.name}
                   </SelectItem>
                 ))}
                 <SelectItem value={NEW_SECTOR}>+ Criar novo setor</SelectItem>
