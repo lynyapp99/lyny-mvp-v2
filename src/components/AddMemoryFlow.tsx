@@ -44,29 +44,29 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
     {
       id: "photo" as const,
       icon: Camera,
-      title: "Photo/Video",
-      description: "Share visual memories",
+      title: "Foto/Vídeo",
+      description: "Compartilhe memórias visuais",
       color: "from-brand-blue to-brand-purple",
     },
     {
       id: "text" as const,
       icon: Type,
-      title: "Text Note",
-      description: "Write about your experience",
+      title: "Nota de texto",
+      description: "Escreva sobre o momento",
       color: "from-brand-green to-brand-blue",
     },
     {
       id: "embed" as const,
       icon: ExternalLink,
-      title: "Social Embed",
-      description: "Share from YouTube, Instagram, etc.",
+      title: "Mídia social",
+      description: "Compartilhe de YouTube, Instagram, etc.",
       color: "from-brand-orange to-brand-pink",
     },
     {
       id: "link" as const,
       icon: LinkIcon,
-      title: "Link/Attachment",
-      description: "Add external content",
+      title: "Link/Anexo",
+      description: "Adicione conteúdo externo",
       color: "from-brand-purple to-brand-orange",
     },
   ];
@@ -118,14 +118,14 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
             <ArrowLeft size={20} className="text-muted-foreground" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Add Memory</h1>
-            <p className="text-muted-foreground">Choose a timeline</p>
+            <h1 className="text-2xl font-bold text-foreground">Adicionar memória</h1>
+            <p className="text-muted-foreground">Escolha uma timeline</p>
           </div>
         </div>
 
         <TimelineSelector
           onSelect={handleTimelineSelect}
-          placeholder="Select timeline to add memory to..."
+          placeholder="Selecione uma timeline..."
         />
       </div>
     );
@@ -142,8 +142,8 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
             <ArrowLeft size={20} className="text-muted-foreground" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Memory Type</h1>
-            <p className="text-muted-foreground">Adding to {selectedTimeline?.title}</p>
+            <h1 className="text-2xl font-bold text-foreground">Tipo de memória</h1>
+            <p className="text-muted-foreground">Adicionando em {selectedTimeline?.title}</p>
           </div>
         </div>
 
@@ -187,9 +187,9 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
           <ArrowLeft size={20} className="text-muted-foreground" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Create Memory</h1>
+          <h1 className="text-2xl font-bold text-foreground">Criar memória</h1>
           <p className="text-muted-foreground">
-            {memoryTypes.find(t => t.id === memoryData.type)?.title} in {selectedTimeline?.title}
+            {memoryTypes.find(t => t.id === memoryData.type)?.title} em {selectedTimeline?.title}
           </p>
         </div>
       </div>
@@ -199,11 +199,11 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
         {memoryData.type === "photo" && (
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Photos/Videos
+              Fotos/Vídeos
             </label>
             <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
               <Camera size={32} className="text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Tap to add photos or videos</p>
+              <p className="text-sm text-muted-foreground">Toque para adicionar fotos ou vídeos</p>
             </div>
           </div>
         )}
@@ -211,10 +211,10 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
         {memoryData.type === "text" && (
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Your Memory
+              Sua memória
             </label>
             <textarea
-              placeholder="Tell us about this moment..."
+              placeholder="Conte sobre este momento..."
               value={memoryData.content}
               onChange={(e) => setMemoryData({ ...memoryData, content: e.target.value })}
               rows={4}
@@ -229,7 +229,7 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
           <>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Paste a Link
+                Cole um link
               </label>
               <input
                 type="url"
@@ -264,7 +264,7 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Título Personalizado (Opcional)
+                Título personalizado (opcional)
               </label>
               <input
                 type="text"
@@ -282,11 +282,11 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
         {memoryData.type === "link" && (
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Link or URL
+              Link ou URL
             </label>
             <input
               type="url"
-              placeholder="https://example.com"
+              placeholder="https://exemplo.com"
               value={memoryData.content}
               onChange={(e) => setMemoryData({ ...memoryData, content: e.target.value })}
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
@@ -300,7 +300,7 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
         {memoryData.type === "embed" && (
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Caption (Opcional)
+              Legenda (opcional)
             </label>
             <textarea
               placeholder="Adicione uma legenda ao seu embed..."
@@ -318,7 +318,7 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
         <div>
           <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
             <Calendar size={16} />
-            Date
+            Data
           </label>
           <input
             type="date"
@@ -333,11 +333,11 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
         <div>
           <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
             <MapPin size={16} />
-            Location (Optional)
+            Localização (opcional)
           </label>
           <input
             type="text"
-            placeholder="Where was this?"
+            placeholder="Onde foi isso?"
             value={memoryData.location}
             onChange={(e) => setMemoryData({ ...memoryData, location: e.target.value })}
             className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
@@ -367,7 +367,7 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
           </div>
           <input
             type="text"
-            placeholder="Add tags..."
+            placeholder="Adicionar tags..."
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
                 const tag = e.currentTarget.value.trim().replace('#', '');
@@ -381,7 +381,7 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
                      text-foreground placeholder:text-muted-foreground
                      focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
           />
-          <p className="text-xs text-muted-foreground mt-1">Press Enter to add tags</p>
+          <p className="text-xs text-muted-foreground mt-1">Pressione Enter para adicionar tags</p>
         </div>
 
         {/* Add Memory Button */}
@@ -393,7 +393,7 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
             (memoryData.type === "embed" && !memoryData.embedUrl.trim())
           }
         >
-          Add Memory
+          Adicionar memória
         </Button>
       </div>
     </div>
