@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings, Camera, Eye, Share2, Copy, Globe, Plus, Check, ExternalLink, Shield } from "lucide-react";
+import { Settings, Camera, Eye, Copy, Globe, Plus, Check, ExternalLink } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import PublicProfileSettings from "@/components/PublicProfileSettings";
 import PublicProfileView from "@/components/PublicProfileView";
 import SettingsScreen from "@/components/SettingsScreen";
 import HiddenTimelinesAccess from "@/components/HiddenTimelinesAccess";
-import { mockUserProfile, togglePublicProfile } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useTimelines } from "@/lib/api/timelines";
@@ -27,47 +26,47 @@ const Profile = () => {
   const { data: dbProfile } = useProfile();
   const { data: timelineRows = [] } = useTimelines();
   const [currentView, setCurrentView] = useState<ProfileView>("main");
-  const [profileState, setProfileState] = useState(mockUserProfile);
+  const [publicProfileEnabled, setPublicProfileEnabled] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [showHiddenAccess, setShowHiddenAccess] = useState(false);
 
   const allTimelines = timelineRows.map(timelineFromRow);
   const publicTimelines = allTimelines.filter((t) => t.privacy === "public");
 
-  const displayName = dbProfile?.display_name || dbProfile?.username || user?.email?.split("@")[0] || "You";
+  const displayName = dbProfile?.display_name || dbProfile?.username || user?.email?.split("@")[0] || "Você";
   const avatarUrl = dbProfile?.avatar_url ?? undefined;
   const bio = dbProfile?.bio ?? "";
+  const username = dbProfile?.username || user?.email?.split("@")[0] || "voce";
+  const shareableLink = `${typeof window !== "undefined" ? window.location.origin : ""}/u/${username}`;
 
   const handlePublicProfileToggle = (enabled: boolean) => {
-    togglePublicProfile(enabled);
-    setProfileState({ ...profileState, publicProfile: { ...profileState.publicProfile, enabled } });
-    
+    setPublicProfileEnabled(enabled);
     if (enabled) {
       toast({
-        title: "Public profile enabled",
-        description: "You can now customize and share your profile.",
+        title: "Perfil público ativado",
+        description: "Você já pode personalizar e compartilhar seu perfil.",
       });
     } else {
       toast({
-        title: "Public profile disabled",
-        description: "Your profile is now private and not shareable.",
+        title: "Perfil público desativado",
+        description: "Seu perfil está privado e não pode ser compartilhado.",
       });
     }
   };
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(profileState.publicProfile.shareableLink);
+      await navigator.clipboard.writeText(shareableLink);
       setLinkCopied(true);
       toast({
-        title: "Link copied!",
-        description: "Your profile link has been copied to clipboard.",
+        title: "Link copiado",
+        description: "O link do seu perfil foi copiado.",
       });
       setTimeout(() => setLinkCopied(false), 2000);
     } catch (err) {
       toast({
-        title: "Failed to copy",
-        description: "Please copy the link manually.",
+        title: "Falha ao copiar",
+        description: "Copie o link manualmente.",
         variant: "destructive",
       });
     }
@@ -149,25 +148,25 @@ const Profile = () => {
               <div>
                 <div className="font-semibold text-foreground">Perfil público</div>
                 <div className="text-sm text-muted-foreground">
-                  {profileState.publicProfile.enabled ? "Visível para outras pessoas" : "Apenas privado"}
+                  {publicProfileEnabled ? "Visível para outras pessoas" : "Apenas privado"}
                 </div>
               </div>
             </div>
             <Switch
-              checked={profileState.publicProfile.enabled}
+              checked={publicProfileEnabled}
               onCheckedChange={handlePublicProfileToggle}
             />
           </div>
           
-          {profileState.publicProfile.enabled && (
+          {publicProfileEnabled && (
             <div className="text-xs text-muted-foreground">
-              {publicTimelines.length} timeline{publicTimelines.length !== 1 ? 's' : ''} shared publicly
+              {publicTimelines.length} timeline{publicTimelines.length !== 1 ? 's' : ''} compartilhada{publicTimelines.length !== 1 ? 's' : ''} publicamente
             </div>
           )}
         </GlassCard>
 
         {/* Public Profile Preview */}
-        {profileState.publicProfile.enabled ? (
+        {publicProfileEnabled ? (
           <div className="space-y-6">
             {/* Profile Header Preview */}
             <div className="text-center">
@@ -192,7 +191,7 @@ const Profile = () => {
                   <div className="text-lg font-semibold text-primary">
                     {publicTimelines.reduce((sum, timeline) => sum + timeline.items, 0)}
                   </div>
-                  <div className="text-xs text-muted-foreground">Memories</div>
+                  <div className="text-xs text-muted-foreground">Memórias</div>
                 </div>
               </div>
             </div>
@@ -200,7 +199,7 @@ const Profile = () => {
             {/* Public Timelines Preview */}
             {publicTimelines.length > 0 ? (
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4">Shared Timelines</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">Timelines compartilhadas</h3>
                 <div className="grid gap-3">
                   {publicTimelines.slice(0, 3).map((timeline) => (
                     <div
@@ -216,14 +215,14 @@ const Profile = () => {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium text-foreground">{timeline.title}</h4>
-                        <p className="text-sm text-muted-foreground">{timeline.items} memories</p>
+                        <p className="text-sm text-muted-foreground">{timeline.items} memórias</p>
                       </div>
                     </div>
                   ))}
                   {publicTimelines.length > 3 && (
                     <div className="text-center py-2">
                       <span className="text-sm text-muted-foreground">
-                        +{publicTimelines.length - 3} more timeline{publicTimelines.length - 3 !== 1 ? 's' : ''}
+                        +{publicTimelines.length - 3} timeline{publicTimelines.length - 3 !== 1 ? 's' : ''}
                       </span>
                     </div>
                   )}
@@ -234,16 +233,16 @@ const Profile = () => {
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                   <Plus size={24} className="text-muted-foreground" />
                 </div>
-                <h3 className="font-medium text-foreground mb-2">Your public profile is empty</h3>
+                <h3 className="font-medium text-foreground mb-2">Seu perfil público está vazio</h3>
                 <p className="text-sm text-muted-foreground mb-4 px-4">
-                  Choose which timelines you want to share with others
+                  Escolha quais timelines você quer compartilhar
                 </p>
                 <Button
                   onClick={() => setCurrentView("publicSettings")}
                   variant="outline"
                   size="sm"
                 >
-                  Select Timelines
+                  Selecionar timelines
                 </Button>
               </div>
             )}
@@ -257,7 +256,7 @@ const Profile = () => {
                   className="flex items-center gap-2"
                 >
                   <Camera size={16} />
-                  Edit Profile
+                  Editar perfil
                 </IOSButton>
                 <IOSButton
                   onClick={() => setCurrentView("publicPreview")}
@@ -265,7 +264,7 @@ const Profile = () => {
                   className="flex items-center gap-2"
                 >
                   <Eye size={16} />
-                  Preview
+                  Pré-visualizar
                 </IOSButton>
               </div>
               
@@ -274,7 +273,7 @@ const Profile = () => {
                 className="w-full flex items-center gap-2"
               >
                 {linkCopied ? <Check size={16} /> : <Copy size={16} />}
-                {linkCopied ? "Link Copied!" : "Copy Shareable Link"}
+                {linkCopied ? "Link copiado!" : "Copiar link de compartilhamento"}
               </IOSButton>
             </div>
           </div>
@@ -284,25 +283,25 @@ const Profile = () => {
             <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-6">
               <Globe size={32} className="text-muted-foreground" />
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-3">Share Your Story</h2>
+            <h2 className="text-xl font-bold text-foreground mb-3">Compartilhe sua história</h2>
             <p className="text-muted-foreground mb-6 px-4">
-              Create a public profile to share your favorite timelines and memories with others.
+              Crie um perfil público para compartilhar suas timelines e memórias favoritas.
             </p>
             <div className="space-y-4">
               <div className="text-left bg-muted/30 rounded-2xl p-4">
-                <h4 className="font-medium text-foreground mb-2">What gets shared:</h4>
+                <h4 className="font-medium text-foreground mb-2">O que é compartilhado:</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Your display name and bio</li>
-                  <li>• Timelines you choose to make public</li>
-                  <li>• Timeline covers and descriptions only</li>
+                  <li>• Seu nome de exibição e bio</li>
+                  <li>• Timelines que você escolher tornar públicas</li>
+                  <li>• Apenas capas e descrições das timelines</li>
                 </ul>
               </div>
               <div className="text-left bg-primary/5 rounded-2xl p-4 border border-primary/20">
-                <h4 className="font-medium text-primary mb-2">What stays private:</h4>
+                <h4 className="font-medium text-primary mb-2">O que continua privado:</h4>
                 <ul className="text-sm text-primary/80 space-y-1">
-                  <li>• Individual memories and photos</li>
-                  <li>• Member details and comments</li>
-                  <li>• Private and relationship timelines</li>
+                  <li>• Memórias e fotos individuais</li>
+                  <li>• Detalhes de membros e comentários</li>
+                  <li>• Timelines privadas e de relacionamento</li>
                 </ul>
               </div>
               <IOSButton
@@ -310,7 +309,7 @@ const Profile = () => {
                 className="w-full flex items-center gap-2"
               >
                 <ExternalLink size={16} />
-                Enable Public Profile
+                Ativar perfil público
               </IOSButton>
             </div>
           </div>
@@ -349,7 +348,7 @@ const Profile = () => {
         {/* Sign out */}
         <div className="mt-8">
           <IOSButton variant="outline" className="w-full" onClick={handleSignOut}>
-            Sign out
+            Sair
           </IOSButton>
         </div>
       </div>
