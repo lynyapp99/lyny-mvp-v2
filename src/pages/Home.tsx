@@ -522,7 +522,34 @@ const Home = () => {
 
       {/* Main Content */}
       <div className="relative">
-        {sectors.length > 0 ? (
+        {sectors.length === 0 && allTimelines.length === 0 ? (
+          <div className="max-w-md mx-auto flex flex-col items-center justify-center py-20 px-6 text-center">
+            <div className="w-24 h-24 rounded-app-xl bg-muted/30 flex items-center justify-center mb-6">
+              <span className="text-5xl">📱</span>
+            </div>
+            <h2 className="text-[22px] font-semibold text-foreground mb-3">
+              Comece sua jornada
+            </h2>
+            <p className="text-[17px] text-muted-foreground leading-relaxed mb-6 max-w-sm">
+              Crie sua primeira timeline para começar a guardar memórias.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+              <Button
+                onClick={() => handleAddTimeline(null)}
+                className="rounded-pill flex-1"
+              >
+                Criar Timeline
+              </Button>
+              <Button
+                onClick={() => setIsSectorModalOpen(true)}
+                variant="outline"
+                className="rounded-pill flex-1"
+              >
+                Criar Setor
+              </Button>
+            </div>
+          </div>
+        ) : (
           <>
             {/* Timeline Shortcuts Section */}
             <div className="max-w-md mx-auto mt-6">
@@ -539,6 +566,7 @@ const Home = () => {
             </div>
 
             {/* Sector Carousel + Dots (mobile-first wrapper) */}
+            {sectors.length > 0 && (
             <div className="max-w-md mx-auto">
               {/* Section Title */}
               <div className="px-4 mb-4">
@@ -620,8 +648,58 @@ const Home = () => {
                   />
                 </div>
               </div>
+            </div>
+            )}
 
-              {/* Recent and Favorites Section - Peek visível */}
+            {/* Timelines without a sector */}
+            {allTimelines.filter((t) => !t.sectorId).length > 0 && (
+              <div className="max-w-md mx-auto px-4 mt-2 mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xl font-bold text-foreground">Timelines</h2>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="rounded-pill gap-1"
+                    onClick={() => handleAddTimeline(null)}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Nova
+                  </Button>
+                </div>
+                <div className="grid gap-3">
+                  {allTimelines
+                    .filter((t) => !t.sectorId)
+                    .map((timeline) => (
+                      <TimelineCard
+                        key={timeline.id}
+                        {...timeline}
+                        isHidden={timeline.isHidden}
+                        authMethod={timeline.authMethod}
+                        onClick={() => handleTimelineClick(timeline)}
+                        onFavoriteToggle={handleFavoriteToggle}
+                        onLongPress={handleLongPress}
+                      />
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty hint when only sectors exist */}
+            {sectors.length === 0 && allTimelines.length > 0 && (
+              <div className="max-w-md mx-auto px-4 mb-6">
+                <Button
+                  onClick={() => setIsSectorModalOpen(true)}
+                  variant="outline"
+                  className="rounded-pill w-full gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Criar Setor para organizar
+                </Button>
+              </div>
+            )}
+
+            {/* Recent and Favorites Section - Peek visível */}
+            <div className="max-w-md mx-auto">
               <div className="max-w-md mx-auto mt-2">
                 <RecentAndFavorites 
                   onTimelineClick={handleTimelineClick}
@@ -630,24 +708,6 @@ const Home = () => {
               </div>
             </div>
           </>
-        ) : (
-          <div className="max-w-md mx-auto flex flex-col items-center justify-center py-20 px-6 text-center">
-            <div className="w-24 h-24 rounded-app-xl bg-muted/30 flex items-center justify-center mb-6">
-              <span className="text-5xl">📱</span>
-            </div>
-            <h2 className="text-[22px] font-semibold text-foreground mb-3">
-              Crie seu primeiro setor
-            </h2>
-            <p className="text-[17px] text-muted-foreground leading-relaxed mb-6 max-w-sm">
-              Organize suas timelines em setores como Família, Amigos ou Projetos
-            </p>
-            <Button 
-              onClick={() => setIsSectorModalOpen(true)}
-              className="rounded-pill"
-            >
-              Criar Setor
-            </Button>
-          </div>
         )}
 
         {/* Edit Mode Actions Bar */}
