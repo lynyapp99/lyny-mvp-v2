@@ -1,65 +1,42 @@
-## Problemas a resolver
+O problema não é o banco nem o salvamento: é a árvore React. O caso mais grave está em `src/pages/Create.tsx`: o componente `CreateTimeline` foi declarado dentro do componente `Create`. Quando qualquer campo chama `setTimelineData` no primeiro caractere, o `Create` re-renderiza, uma nova função `CreateTimeline` é criada, o React entende como outro componente, desmonta/remonta o formulário e o input perde o foco. Isso explica exatamente o comportamento: digita 1 caractere, trava/perde foco, precisa clicar de novo.
 
-### 1. Travamento dos inputs nos modais de criação
+Plano de correção:
 
-**Causa identificada:** Em `Home.tsx`, `buildSectorsWithTimelines(sectorRows, timelineRows)` é executado em todo render e devolve **novos arrays/objetos** a cada vez. Esses arrays são passados como props para `<TimelineModal sectors={sectors} />`. Combinado com o `useEffect([isOpen, defaultSectorId])` do modal e o React Query revalidando, cada keystroke dispara cascata de re-renders no parent, fazendo o input "travar" durante a digitação.
+1. Corrigir a criação de timeline em definitivo
+- Extrair o formulário de criação de timeline para um componente estável fora do `Create`.
+- Preferencialmente criar `src/components/CreateTimelineFlow.tsx` ou mover a função para fora do componente pai.
+- Trocar os campos de texto por formulário não-controlado com `useRef`/`defaultValue`, para digitação não causar re-render.
+- Manter em state somente escolhas que realmente mudam a UI: relacionamento, cor, privacidade, timeline oculta, método de autenticação.
+- Garantir que o usuário consiga digitar “Viagem para Trancoso” letra por letra sem desmontagem, sem perda de foco e sem re-render por caractere.
 
-Além disso, `TimelineModal` e `SectorModal` recriam handlers a cada render e o `useEffect` que reseta o form depende de props instáveis.
+2. Corrigir o modal principal de timeline (`TimelineModal.tsx`)
+- Remover qualquer state disparado durante digitação, especialmente `hasTitle` atualizado no `onInput`.
+- Usar validação apenas no clique em “Criar”.
+- Se necessário, deixar o botão sempre clicável e mostrar erro inline/toast quando o nome estiver vazio, ou atualizar disponibilidade apenas em `onBlur`, nunca por caractere.
+- Remover `autoFocus` se ele estiver competindo com o gerenciamento de foco do Dialog em mobile.
 
-**Correções:**
+3. Corrigir todos os formulários com o mesmo padrão de perda de foco/re-render excessivo
+- Revisar e ajustar campos controlados nos fluxos com inputs/textarea:
+  - `Create.tsx`
+  - `AddMemoryFlow.tsx`
+  - `EditTimelineFlow.tsx`
+  - `DeepenTimelineFlow.tsx`
+  - `SectorModal.tsx`
+  - `NoteComposer.tsx`
+  - `PublicProfileSettings.tsx`
+  - e demais modais encontrados com `value + onChange + setState` em campos de texto.
+- Converter campos de digitação livre para `useRef`/`defaultValue` quando o valor não precisa renderizar em tempo real.
+- Para campos que precisam validar, validar no submit/blur ou manter state mínimo que não remonte o componente.
 
-- **`src/pages/Home.tsx`**
-  - Memoizar `dbSectors` e `allTimelines` com `useMemo` baseado em `sectorRows`/`timelineRows`.
-  - Memoizar `sectors` final (`sectorOverride ?? dbSectors`) com `useMemo`.
-  - Memoizar `handleSaveTimeline`, `handleSaveSector`, `handleAddTimelinesToShortcuts` com `useCallback`.
-  - Memoizar `getAvailableTimelinesForShortcuts()` (passar valor, não função).
-  - Estabilizar `defaultSectorId` (`selectedSectorForTimeline || null`) — já é string estável, mas garantir que não muda enquanto modal está aberto.
+4. Garantir salvamento e navegação da timeline
+- No fluxo de criação usado pela Home, manter a chamada de criação no backend.
+- Após criar:
+  - fechar modal/tela de criação;
+  - invalidar/atualizar a lista para a timeline aparecer imediatamente na home;
+  - redirecionar para `/timeline/{id}`.
+- Preservar criação com setor existente e criação de novo setor quando aplicável.
 
-- **`src/components/TimelineModal.tsx`**
-  - Trocar o `useEffect([isOpen, defaultSectorId])` que reseta os campos por reset condicionado **apenas à transição fechado→aberto** (usar `useRef` do estado anterior de `isOpen`), evitando reset acidental por mudanças nas props enquanto o modal está aberto.
-  - Garantir que cada `<Input>` / `<Textarea>` é controlado por `useState` local independente (já está) e que `onChange` não dispara nada no parent durante a digitação.
-  - Não desestruturar `sectors` em arrays novos dentro do JSX; iterar direto.
-
-- **`src/components/SectorModal.tsx`**
-  - Mesma correção: reset de `name`, `selectedColor`, `selectedIcon` somente na transição fechado→aberto, e somente repopular com `editingSector` nesse momento.
-  - Atualmente o estado inicial usa `editingSector?.name` no `useState` — só é avaliado no mount; se o modal é montado uma vez e reusado, o nome não atualiza ao editar. Corrigir via `useEffect` no abrir.
-
-- **`src/components/NoteComposer.tsx`**
-  - Aplicar mesmo padrão: resetar `text` apenas no abrir (transição), não em todo render.
-
-### 2. Ícone do setor → inicial em círculo
-
-**Local:** Header do card de setor na home, em `src/components/SectorCarouselPage.tsx` (linha ~120-124).
-
-Substituir o `<SectorIcon />` por um avatar circular com a inicial:
-
-```tsx
-<div className="w-10 h-10 rounded-full flex items-center justify-center
-                bg-[hsl(var(--accent))]/15 border border-[hsl(var(--accent))]">
-  <span className="font-dmsans font-semibold text-[18px]
-                   text-[hsl(var(--accent))] leading-none">
-    {sector.name.trim().charAt(0).toUpperCase()}
-  </span>
-</div>
-```
-
-Especificações aplicadas:
-- Círculo 40×40px
-- Background: cor de acento com 15% de opacidade
-- Borda: 1px da cor de acento
-- Letra: primeira letra do nome, maiúscula, DM Sans 600, 18px, cor de acento
-- Adapta automaticamente a dark (vermelho) e light (terracota) via token `--accent`
-
-**Não alterar:**
-- O fallback de thumbnail dentro de cada card de timeline (linha ~184) — continua usando o ícone do setor, pois é contexto diferente (preview de capa).
-- O ícone no estado vazio (linha ~222) — pode permanecer como está, pois não é "card de setor" e sim ilustração de estado.
-
-Se preferir uniformizar (também trocar nesses dois pontos pela inicial), posso aplicar — me avise.
-
-## Arquivos editados
-
-- `src/pages/Home.tsx`
-- `src/components/TimelineModal.tsx`
-- `src/components/SectorModal.tsx`
-- `src/components/NoteComposer.tsx`
-- `src/components/SectorCarouselPage.tsx`
+5. Higiene técnica para evitar regressão
+- Remover componentes declarados dentro de outros componentes quando eles contêm inputs.
+- Usar `useCallback`/props estáveis onde necessário, mas a correção principal será impedir desmontagem/remontagem e parar updates por caractere em formulários pesados.
+- Fazer uma revisão mental campo a campo: ao digitar em qualquer input, nada deve fechar, remontar, trocar `key`, refocar outro elemento ou recriar o componente do formulário.
