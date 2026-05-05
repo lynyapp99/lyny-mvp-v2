@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Play, Share2 } from "lucide-react";
+import { Plus, Play } from "lucide-react";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +14,7 @@ import AddContentSheet from "@/components/AddContentSheet";
 import NoteComposer from "@/components/NoteComposer";
 import MediaViewer from "@/components/MediaViewer";
 import ShareSheet from "@/components/ShareSheet";
+import ContextHeader from "@/components/ContextHeader";
 
 type Upload = { id: string; name: string; progress: number };
 
@@ -99,6 +100,10 @@ const TimelineDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32">
+      <ContextHeader
+        title={timeline.title}
+        onShare={() => setShareOpen(true)}
+      />
       {/* Cover header */}
       <div className="relative w-full h-64 overflow-hidden">
         {timeline.cover ? (
@@ -107,33 +112,6 @@ const TimelineDetail = () => {
           <div className="w-full h-full bg-gradient-to-br from-surface-2 to-surface" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/10" />
-
-        {/* Top action buttons */}
-        <div
-          className="absolute top-0 left-0 right-0 flex items-center justify-between px-4"
-          style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}
-        >
-          <button
-            onClick={() => {
-              if ("vibrate" in navigator) navigator.vibrate(10);
-              navigate(-1);
-            }}
-            className="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-transform"
-            aria-label="Voltar"
-          >
-            <ArrowLeft size={22} />
-          </button>
-          <button
-            onClick={() => {
-              if ("vibrate" in navigator) navigator.vibrate(10);
-              setShareOpen(true);
-            }}
-            className="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-transform"
-            aria-label="Compartilhar"
-          >
-            <Share2 size={22} />
-          </button>
-        </div>
 
         {/* Title */}
         <div className="absolute bottom-4 left-4 right-4">

@@ -6,7 +6,6 @@ import Navigation from "@/components/Navigation";
 import HiddenTimelineAuth from "@/components/HiddenTimelineAuth";
 import SettingsScreen from "@/components/SettingsScreen";
 import { useHiddenTimelineSession } from "@/hooks/useHiddenTimelineSession";
-import { GlassCard } from "@/components/ui/glass-card";
 import RecentAndFavorites from "@/components/RecentAndFavorites";
 import type { Timeline, Sector } from "@/types/timeline";
 import { useSectors, useTimelines, useCreateSector, useDeleteSector, useCreateTimeline } from "@/lib/api/timelines";
@@ -18,13 +17,13 @@ import CarouselDots from "@/components/CarouselDots";
 import SectorModal from "@/components/SectorModal";
 import TimelineModal from "@/components/TimelineModal";
 import { Button } from "@/components/ui/button";
-import { Plus, Menu, Search, Smartphone } from "lucide-react";
+import { Plus, Search, Smartphone } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import EditModeButton from "@/components/EditModeButton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TimelineShortcuts from "@/components/TimelineShortcuts";
 import AddShortcutModal from "@/components/AddShortcutModal";
 import AddSectorCard from "@/components/AddSectorCard";
+import AppHeader from "@/components/AppHeader";
 import {
   Sheet,
   SheetContent,
@@ -489,51 +488,19 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-20">
-      {/* Header - Compacto */}
-      <GlassCard className="sticky top-0 z-40 border-0 border-b border-border/50 safe-area-inset-top">
-        <div className="max-w-md mx-auto px-4 pt-2 pb-2">
-          <div className="flex items-center justify-between mb-2 relative">
-            <button
-              onClick={() => {
-                if ("vibrate" in navigator) navigator.vibrate(10);
-                setIsSettingsOpen(true);
-              }}
-              className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-app focus:outline-none focus:ring-2 focus:ring-accent/60 focus:ring-offset-2 active:scale-95 transition-all duration-150 hover:bg-muted/50 touch-manipulation"
-              aria-label="Abrir menu de configurações"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            <img src="/lyny-logo.png" alt="lyny" className="absolute left-1/2 -translate-x-1/2 h-7 w-auto" />
-            <div className="flex items-center gap-2">
-              <EditModeButton 
-                isEditMode={isEditMode}
-                onClick={toggleEditMode}
-              />
-              <button
-                onClick={() => {
-                  if ("vibrate" in navigator) navigator.vibrate(10);
-                  navigate("/profile");
-                }}
-                className="focus:outline-none focus:ring-2 focus:ring-accent/60 focus:ring-offset-2 rounded-full"
-                aria-label="Menu do usuário"
-              >
-                <Avatar className="h-9 w-9 border border-white/20">
-                  <AvatarImage src={profile?.avatar_url ?? undefined} alt="Avatar do usuário" />
-                  <AvatarFallback>
-                    {(profile?.display_name || profile?.username || user?.email || "?").slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            </div>
+      <AppHeader onMenuClick={() => setIsSettingsOpen(true)} />
+      <div className="max-w-md mx-auto px-4 pt-2 pb-3">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex-1">
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onFilterChange={setFilters}
+            />
           </div>
-
-          <SearchBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onFilterChange={setFilters}
-          />
+          <EditModeButton isEditMode={isEditMode} onClick={toggleEditMode} />
         </div>
-      </GlassCard>
+      </div>
 
       {/* Main Content */}
       <div className="relative">

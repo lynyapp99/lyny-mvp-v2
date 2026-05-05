@@ -2,6 +2,7 @@ import { Users as UsersIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import EmptyState from "@/components/EmptyState";
+import AppHeader from "@/components/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -24,16 +25,9 @@ const Relationships = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-divider">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <h1 className="font-display font-semibold text-3xl text-foreground">Relacionamentos</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Organize pelas pessoas que mais importam
-          </p>
-        </div>
-      </div>
+      <AppHeader />
 
-      <div className="max-w-md mx-auto px-4">
+      <div className="max-w-md mx-auto px-4 py-6">
         {!isLoading && connections.length === 0 && (
           <EmptyState
             icon={UsersIcon}
