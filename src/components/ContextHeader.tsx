@@ -1,5 +1,17 @@
-import { ChevronLeft, Share2, UserPlus } from "lucide-react";
+import { ChevronLeft, Share2, UserPlus, MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export type HeaderMenuItem = {
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+};
 
 interface ContextHeaderProps {
   title: string;
@@ -8,10 +20,12 @@ interface ContextHeaderProps {
   showShare?: boolean;
   onInvite?: () => void;
   showInvite?: boolean;
+  menuItems?: HeaderMenuItem[];
 }
 
-const ContextHeader = ({ title, onBack, onShare, showShare = true, onInvite, showInvite = false }: ContextHeaderProps) => {
+const ContextHeader = ({ title, onBack, onShare, showShare = true, onInvite, showInvite = false, menuItems }: ContextHeaderProps) => {
   const navigate = useNavigate();
+  const hasMenu = !!menuItems && menuItems.length > 0;
   return (
     <header
       className="sticky top-0 z-40 bg-background"
@@ -58,7 +72,31 @@ const ContextHeader = ({ title, onBack, onShare, showShare = true, onInvite, sho
               <Share2 className="h-5 w-5" />
             </button>
           ) : (
-            !showInvite && <span className="w-11" />
+            !showInvite && !hasMenu && <span className="w-11" />
+          )}
+          {hasMenu && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  onClick={() => "vibrate" in navigator && navigator.vibrate(10)}
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-app text-foreground active:scale-95 transition-transform"
+                  aria-label="Mais opções"
+                >
+                  <MoreVertical className="h-5 w-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[200px]">
+                {menuItems!.map((item) => (
+                  <DropdownMenuItem
+                    key={item.label}
+                    onClick={item.onClick}
+                    className={item.destructive ? "text-destructive focus:text-destructive" : ""}
+                  >
+                    {item.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
