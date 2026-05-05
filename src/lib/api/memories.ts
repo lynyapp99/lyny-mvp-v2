@@ -76,6 +76,54 @@ export const useCreateNote = (timelineId: string) => {
   });
 };
 
+export const useDeleteMedia = (timelineId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ memoryId, storagePath }: { memoryId: string; storagePath: string }) => {
+      // Remove file from storage (best-effort)
+      await supabase.storage.from("memories").remove([storagePath]);
+
+      // Delete the media row
+      const { error: mmErr } = await supabase
+        .from("memory_media")
+        .delete()
+        .eq("memory_id", memoryId)
+        .eq("storage_path", storagePath);
+      if (mmErr) throw mmErr;
+
+      // If memory has no remaining media and is of kind 'media', delete it
+      const { data: remaining } = await supabase
+        .from("memory_media")
+        .select("id")
+        .eq("memory_id", memoryId)
+        .limit(1);
+      if (!remaining || remaining.length === 0) {
+        await supabase.from("memories").delete().eq("id", memoryId).eq("kind", "media");
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["memories", timelineId] }),
+  });
+};
+
+export const deleteTimelineCompletely = async (timelineId: string) => {
+  // Fetch all storage paths for this timeline
+  const { data: mems } = await supabase
+    .from("memories")
+    .select("id, memory_media(storage_path)")
+    .eq("timeline_id", timelineId);
+  const paths: string[] = [];
+  for (const m of mems ?? []) {
+    for (const mm of (m as any).memory_media ?? []) {
+      if (mm.storage_path) paths.push(mm.storage_path);
+    }
+  }
+  if (paths.length > 0) {
+    await supabase.storage.from("memories").remove(paths);
+  }
+  const { error } = await supabase.from("timelines").delete().eq("id", timelineId);
+  if (error) throw error;
+};
+
 export type UploadProgress = {
   id: string;
   name: string;
