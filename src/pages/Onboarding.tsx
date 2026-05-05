@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,26 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [index, setIndex] = useState(0);
+
+  // If a logged-in user already completed onboarding, send them home.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && data?.onboarding_completed) {
+          navigate("/home", { replace: true });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, navigate]);
+
   const isLast = index === SLIDES.length - 1;
   const slide = SLIDES[index];
 
@@ -54,13 +74,21 @@ const Onboarding = () => {
   const handleCreateAccount = async () => {
     if ("vibrate" in navigator) navigator.vibrate(10);
     await finish();
-    navigate("/auth?mode=signup", { replace: true });
+    if (user) {
+      navigate("/home", { replace: true });
+    } else {
+      navigate("/auth?mode=signup", { replace: true });
+    }
   };
 
   const handleSignIn = async () => {
     if ("vibrate" in navigator) navigator.vibrate(10);
     await finish();
-    navigate("/auth?mode=signin", { replace: true });
+    if (user) {
+      navigate("/home", { replace: true });
+    } else {
+      navigate("/auth?mode=signin", { replace: true });
+    }
   };
 
   const handleDot = (i: number) => {
