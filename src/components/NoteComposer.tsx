@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -10,22 +10,15 @@ interface Props {
 
 const NoteComposer = ({ open, onOpenChange, onSave }: Props) => {
   const textRef = useRef<HTMLTextAreaElement>(null);
-  const [hasText, setHasText] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const wasOpenRef = useRef(false);
   useEffect(() => {
     if (open && !wasOpenRef.current) {
       if (textRef.current) textRef.current.value = "";
-      setHasText(false);
     }
     wasOpenRef.current = open;
   }, [open]);
-
-  const onTextInput = useCallback((e: React.FormEvent<HTMLTextAreaElement>) => {
-    const next = e.currentTarget.value.trim().length > 0;
-    setHasText((prev) => (prev === next ? prev : next));
-  }, []);
 
   const handleSave = async () => {
     const v = textRef.current?.value.trim() ?? "";
@@ -34,7 +27,6 @@ const NoteComposer = ({ open, onOpenChange, onSave }: Props) => {
     try {
       await onSave(v);
       if (textRef.current) textRef.current.value = "";
-      setHasText(false);
       onOpenChange(false);
     } finally {
       setSaving(false);
@@ -49,9 +41,7 @@ const NoteComposer = ({ open, onOpenChange, onSave }: Props) => {
         </DialogHeader>
         <textarea
           ref={textRef}
-          autoFocus
           defaultValue=""
-          onInput={onTextInput}
           rows={6}
           placeholder="Escreva sua nota..."
           className="w-full px-4 py-3 bg-muted/50 rounded-xl border-0 text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -60,7 +50,7 @@ const NoteComposer = ({ open, onOpenChange, onSave }: Props) => {
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} disabled={!hasText || saving}>
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? "Salvando..." : "Salvar"}
           </Button>
         </DialogFooter>
