@@ -355,6 +355,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_timeline_member: {
+        Args: { _timeline_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_timeline_owner: {
         Args: { _timeline_id: string; _user_id: string }
         Returns: boolean

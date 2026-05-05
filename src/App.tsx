@@ -21,6 +21,7 @@ import Profile from "./pages/Profile";
 import TimelineDetail from "./pages/TimelineDetail";
 import HiddenTimelineDemo from "./pages/HiddenTimelineDemo";
 import TimelinePublic from "./pages/TimelinePublic";
+import InviteAccept from "./pages/InviteAccept";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/convite/:eventId" element={<EventInvite />} />
           <Route path="/t/:timelineId" element={<TimelinePublic />} />
+          <Route path="/invite/:token" element={<InviteAccept />} />
           <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/relationships" element={<RequireAuth><Relationships /></RequireAuth>} />
           <Route path="/create" element={<RequireAuth><Create /></RequireAuth>} />

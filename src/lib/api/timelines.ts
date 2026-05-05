@@ -95,3 +95,29 @@ export const useCreateTimeline = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["timelines"] }),
   });
 };
+
+export const useSharedTimelines = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["shared-timelines", user?.id],
+    enabled: !!user,
+    queryFn: async (): Promise<TimelineRow[]> => {
+      if (!user) return [];
+      const { data: memberships, error: memErr } = await supabase
+        .from("timeline_members")
+        .select("timeline_id")
+        .eq("user_id", user.id);
+      if (memErr) throw memErr;
+      const ids = (memberships ?? []).map((m) => m.timeline_id);
+      if (ids.length === 0) return [];
+      const { data, error } = await supabase
+        .from("timelines")
+        .select("*")
+        .in("id", ids)
+        .neq("user_id", user.id)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+};
