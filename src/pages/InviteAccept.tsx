@@ -63,11 +63,17 @@ export default function InviteAccept() {
       return;
     }
     if (!invite) return;
-    await supabase.from("timeline_members").upsert({
+    const { error: memberError } = await supabase.from("timeline_members").upsert({
       timeline_id: invite.timeline_id,
       user_id: user.id,
       role: "viewer",
     }, { onConflict: "timeline_id,user_id" });
+    if (memberError) {
+      console.error("Erro ao inserir membro:", memberError);
+      alert("Erro ao aceitar convite: " + memberError.message);
+      setAccepting(false);
+      return;
+    }
     console.log("[invite] accepted, navigating to timeline:", invite.timeline_id);
     await qc.invalidateQueries({ queryKey: ["timelines"] });
     await qc.invalidateQueries({ queryKey: ["shared-timelines"] });
