@@ -638,39 +638,6 @@ const Home = () => {
             </div>
             )}
 
-            {/* Timelines without a sector */}
-            {allTimelines.filter((t) => !t.sectorId).length > 0 && (
-              <div className="max-w-md mx-auto px-4 mt-2 mb-8">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-xl font-bold text-foreground">Timelines</h2>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="rounded-pill gap-1"
-                    onClick={() => handleAddTimeline(null)}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Nova
-                  </Button>
-                </div>
-                <div className="grid gap-3">
-                  {allTimelines
-                    .filter((t) => !t.sectorId)
-                    .map((timeline) => (
-                      <TimelineCard
-                        key={timeline.id}
-                        {...timeline}
-                        isHidden={timeline.isHidden}
-                        authMethod={timeline.authMethod}
-                        onClick={() => handleTimelineClick(timeline)}
-                        onFavoriteToggle={handleFavoriteToggle}
-                        onLongPress={handleLongPress}
-                      />
-                    ))}
-                </div>
-              </div>
-            )}
-
             {/* Empty hint when only sectors exist */}
             {sectors.length === 0 && allTimelines.length > 0 && (
               <div className="max-w-md mx-auto px-4 mb-6">
