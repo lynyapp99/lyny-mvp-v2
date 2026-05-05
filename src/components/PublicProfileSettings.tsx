@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowLeft, Copy, Eye, Globe, Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,12 +22,16 @@ const PublicProfileSettings = ({ onBack, onPreview }: PublicProfileSettingsProps
   const { data: dbProfile } = useProfile();
   const username = dbProfile?.username || user?.email?.split("@")[0] || "voce";
   const initialLink = `${typeof window !== "undefined" ? window.location.origin : ""}/u/${username}`;
+  const initialDisplayName = dbProfile?.display_name || username;
+  const initialBio = dbProfile?.bio || "";
+  const displayNameRef = useRef<HTMLInputElement>(null);
+  const bioRef = useRef<HTMLTextAreaElement>(null);
   const [profileData, setProfileData] = useState({
-    displayName: dbProfile?.display_name || username,
-    bio: dbProfile?.bio || "",
     avatar: dbProfile?.avatar_url || "",
     publicTimelineIds: [] as string[],
     shareableLink: initialLink,
+    displayNameForUI: initialDisplayName,
+    bioLen: initialBio.length,
   });
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -135,8 +139,9 @@ const PublicProfileSettings = ({ onBack, onPreview }: PublicProfileSettingsProps
           <Label htmlFor="displayName">Nome de exibição</Label>
           <Input
             id="displayName"
-            value={profileData.displayName}
-            onChange={(e) => setProfileData({ ...profileData, displayName: e.target.value })}
+            ref={displayNameRef}
+            defaultValue={initialDisplayName}
+            onBlur={(e) => setProfileData((p) => ({ ...p, displayNameForUI: e.target.value }))}
             placeholder="Como as outras pessoas devem ver seu nome?"
           />
         </div>
@@ -148,7 +153,7 @@ const PublicProfileSettings = ({ onBack, onPreview }: PublicProfileSettingsProps
             <Avatar className="w-16 h-16">
               <AvatarImage src={profileData.avatar} />
               <AvatarFallback className="text-lg font-semibold bg-primary/10 text-primary">
-                {profileData.displayName.split(' ').map(n => n[0]).join('')}
+                {profileData.displayNameForUI.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
             <Button variant="outline" size="sm">
@@ -162,14 +167,15 @@ const PublicProfileSettings = ({ onBack, onPreview }: PublicProfileSettingsProps
           <Label htmlFor="bio">Bio</Label>
           <Textarea
             id="bio"
-            value={profileData.bio}
-            onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+            ref={bioRef}
+            defaultValue={initialBio}
+            onBlur={(e) => setProfileData((p) => ({ ...p, bioLen: e.target.value.length }))}
             placeholder="Conte um pouco sobre você..."
             rows={3}
             className="resize-none"
           />
           <p className="text-xs text-muted-foreground">
-            {profileData.bio.length}/160 caracteres
+            {profileData.bioLen}/160 caracteres
           </p>
         </div>
 
