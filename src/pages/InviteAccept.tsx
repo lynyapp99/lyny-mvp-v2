@@ -1,25 +1,113 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
-export default function Invite() {
+interface InviteInfo {
+  timeline_id: string;
+  timeline_title: string;
+  timeline_subtitle: string;
+  owner_name: string;
+  owner_id: string;
+  cover_url: string;
+}
+
+export default function InviteAccept() {
   const { token } = useParams();
-  const [debug, setDebug] = useState("carregando...");
+  const navigate = useNavigate();
+  const [invite, setInvite] = useState<InviteInfo | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [accepting, setAccepting] = useState(false);
 
   useEffect(() => {
-    const run = async () => {
-      setDebug(`token: ${token}`);
-      const { data, error } = await supabase.rpc("get_invite_info", { _token: token as string });
-      setDebug(
-        `token: ${token}\ndata: ${JSON.stringify(data)}\nerror: ${JSON.stringify(error)}`
-      );
+    if (!token) {
+      setError("Convite inválido");
+      setLoading(false);
+      return;
+    }
+    const load = async () => {
+      try {
+        const { data, error: rpcError } = await supabase.rpc("get_invite_info", { _token: token });
+        if (rpcError) throw rpcError;
+        const tl = Array.isArray(data) ? data[0] : data;
+        if (!tl) {
+          setError("Este link de convite não existe ou foi removido.");
+          return;
+        }
+        setInvite({
+          timeline_id: tl.timeline_id,
+          timeline_title: tl.timeline_title,
+          timeline_subtitle: tl.timeline_subtitle,
+          owner_name: tl.owner_name || "Alguém",
+          owner_id: tl.owner_id,
+          cover_url: tl.cover_url,
+        });
+      } catch (e: any) {
+        setError(e.message || "Erro ao buscar convite");
+      } finally {
+        setLoading(false);
+      }
     };
-    run();
+    load();
   }, [token]);
 
+  const handleAccept = async () => {
+    setAccepting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      sessionStorage.setItem("pendingInvite", token!);
+      navigate("/auth?redirect=/invite/" + token);
+      return;
+    }
+    if (!invite) return;
+    await supabase.from("timeline_members").upsert({
+      timeline_id: invite.timeline_id,
+      user_id: user.id,
+      role: "viewer",
+    }, { onConflict: "timeline_id,user_id" });
+    navigate("/timeline/" + invite.timeline_id);
+  };
+
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <p className="text-white">Carregando convite...</p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 px-6">
+      <div className="w-20 h-20 rounded-2xl bg-zinc-900 flex items-center justify-center text-4xl">🔒</div>
+      <h1 className="text-white text-2xl font-bold font-playfair text-center">Convite inválido</h1>
+      <p className="text-zinc-400 text-center">{error}</p>
+      <Button onClick={() => navigate("/")} className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8">
+        Voltar ao início
+      </Button>
+    </div>
+  );
+
   return (
-    <pre style={{ padding: 24, color: "white", background: "black", whiteSpace: "pre-wrap", wordBreak: "break-all", minHeight: "100vh", fontSize: 14 }}>
-      {debug}
-    </pre>
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6 px-6">
+      {invite?.cover_url && (
+        <img src={invite.cover_url} alt="capa" className="w-32 h-32 rounded-2xl object-cover" />
+      )}
+      <div className="text-center">
+        <p className="text-zinc-400 text-sm mb-1">{invite?.owner_name} te convidou para</p>
+        <h1 className="text-white text-3xl font-bold font-playfair">{invite?.timeline_title}</h1>
+        {invite?.timeline_subtitle && (
+          <p className="text-zinc-400 mt-1">{invite?.timeline_subtitle}</p>
+        )}
+      </div>
+      <Button
+        onClick={handleAccept}
+        disabled={accepting}
+        className="bg-red-600 hover:bg-red-700 text-white rounded-full px-10 py-3 text-lg w-full max-w-xs"
+      >
+        {accepting ? "Entrando..." : "Aceitar convite"}
+      </Button>
+      <Button variant="ghost" onClick={() => navigate("/")} className="text-zinc-500">
+        Voltar ao início
+      </Button>
+    </div>
   );
 }
