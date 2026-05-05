@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import AddContentSheet from "@/components/AddContentSheet";
 import NoteComposer from "@/components/NoteComposer";
 import MediaViewer from "@/components/MediaViewer";
-import ShareSheet from "@/components/ShareSheet";
 import InviteSheet from "@/components/InviteSheet";
 import ContextHeader from "@/components/ContextHeader";
 
