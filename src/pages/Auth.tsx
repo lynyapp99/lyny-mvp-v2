@@ -32,6 +32,7 @@ const Auth = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [successName, setSuccessName] = useState<string | null>(null);
+  const [pendingEmailConfirmation, setPendingEmailConfirmation] = useState(false);
 
   const redirectParam = searchParams.get("redirect");
   const from = redirectParam || (location.state as { from?: string } | null)?.from || "/home";
@@ -55,9 +56,9 @@ const Auth = () => {
   const showError = (field: keyof FieldErrors) =>
     (touched[field] || formError !== null) && errors[field];
 
-  // Redirect on session, except when showing success screen
+  // Redirect on session. Single source of truth: the Supabase session.
   useEffect(() => {
-    if (session && !successName) {
+    if (session) {
       (async () => {
         const pending = localStorage.getItem("onboarding_pending_complete") === "1";
         const { data } = await supabase
@@ -72,14 +73,7 @@ const Auth = () => {
         }
       })();
     }
-  }, [session, from, navigate, successName]);
-
-  // After success screen, clear it so the session-based redirect takes over.
-  useEffect(() => {
-    if (!successName) return;
-    const t = setTimeout(() => setSuccessName(null), 1800);
-    return () => clearTimeout(t);
-  }, [successName]);
+  }, [session, from, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +84,7 @@ const Auth = () => {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -102,7 +96,13 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        setSuccessName(username.trim());
+        if (data.session) {
+          // Logged-in immediately: useEffect on `session` will redirect to /onboarding.
+          setSuccessName(username.trim());
+        } else {
+          // Email confirmation required: no session, do not redirect.
+          setPendingEmailConfirmation(true);
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -133,7 +133,27 @@ const Auth = () => {
     }
   };
 
-  // Success screen
+  // Email confirmation pending screen
+  if (pendingEmailConfirmation) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center max-w-sm animate-in fade-in duration-500">
+          <div className="mx-auto mb-6 w-20 h-20 rounded-full bg-primary/15 flex items-center justify-center">
+            <Check size={32} className="text-primary" strokeWidth={3} />
+          </div>
+          <h1 className="font-display font-semibold text-2xl text-foreground">
+            Verifique seu e-mail
+          </h1>
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            Enviamos um link de confirmação para <span className="text-foreground">{email}</span>.
+            Abra-o para ativar sua conta e entrar.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Success screen (shown briefly while session-based redirect kicks in)
   if (successName) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
