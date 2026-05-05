@@ -57,15 +57,29 @@ const Auth = () => {
 
   // Redirect on session, except when showing success screen
   useEffect(() => {
-    if (session && !successName) navigate(from, { replace: true });
+    if (session && !successName) {
+      (async () => {
+        const pending = localStorage.getItem("onboarding_pending_complete") === "1";
+        const { data } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (data?.onboarding_completed || pending) {
+          navigate(from, { replace: true });
+        } else {
+          navigate("/onboarding", { replace: true });
+        }
+      })();
+    }
   }, [session, from, navigate, successName]);
 
-  // After success screen, navigate to onboarding
+  // After success screen, clear it so the session-based redirect takes over.
   useEffect(() => {
     if (!successName) return;
-    const t = setTimeout(() => navigate("/onboarding", { replace: true }), 2000);
+    const t = setTimeout(() => setSuccessName(null), 1800);
     return () => clearTimeout(t);
-  }, [successName, navigate]);
+  }, [successName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -9,17 +10,27 @@ const Splash = () => {
 
   useEffect(() => {
     if (loading) return;
-    const timer = setTimeout(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      if (cancelled) return;
       if (session) {
-        navigate("/home", { replace: true });
+        const { data } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        navigate(data?.onboarding_completed ? "/home" : "/onboarding", { replace: true });
       } else if (localStorage.getItem("onboarding_seen")) {
         navigate("/auth", { replace: true });
       } else {
         navigate("/onboarding", { replace: true });
       }
     }, 1200);
-
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [navigate, session, loading]);
 
   return (

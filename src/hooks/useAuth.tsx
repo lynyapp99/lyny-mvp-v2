@@ -20,6 +20,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setLoading(false);
+      // If onboarding was completed before signup, persist now.
+      if (newSession?.user && localStorage.getItem("onboarding_pending_complete") === "1") {
+        setTimeout(() => {
+          supabase
+            .from("profiles")
+            .update({ onboarding_completed: true })
+            .eq("id", newSession.user.id)
+            .then(() => localStorage.removeItem("onboarding_pending_complete"));
+        }, 0);
+      }
     });
     // THEN get current
     supabase.auth.getSession().then(({ data }) => {
