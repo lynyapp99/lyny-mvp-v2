@@ -1,8 +1,6 @@
 import { useRef, useState } from "react";
 import { Upload, Lock, Users, ArrowLeft, Shield, Fingerprint, Star } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import { Button } from "@/components/ui/button";
-import { GlassCard } from "@/components/ui/glass-card";
 import { IOSButton } from "@/components/ui/ios-button";
 import CreateChoice from "@/components/CreateChoice";
 import AddMemoryFlow from "@/components/AddMemoryFlow";
