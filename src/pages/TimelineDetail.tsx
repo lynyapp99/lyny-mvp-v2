@@ -1,14 +1,31 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Plus, Play } from "lucide-react";
+import { Plus, Play, Trash2 } from "lucide-react";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useTimelines, useSharedTimelines, type TimelineRow } from "@/lib/api/timelines";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { timelineFromRow } from "@/lib/api/adapters";
-import { useTimelineMemories, useCreateNote, uploadTimelineMedia, type FeedItem } from "@/lib/api/memories";
+import {
+  useTimelineMemories,
+  useCreateNote,
+  uploadTimelineMedia,
+  useDeleteMedia,
+  deleteTimelineCompletely,
+  type FeedItem,
+} from "@/lib/api/memories";
 import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +65,11 @@ const TimelineDetail = () => {
   const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [deleteTimelineOpen, setDeleteTimelineOpen] = useState(false);
+  const [deletingTimeline, setDeletingTimeline] = useState(false);
+  const [mediaToDelete, setMediaToDelete] = useState<FeedItem | null>(null);
+
+  const deleteMedia = useDeleteMedia(timelineId ?? "");
 
   const cachedRow = timelineRows.find((t) => t.id === timelineId);
 
@@ -99,6 +121,40 @@ const TimelineDetail = () => {
     );
   }
 
+  const handleDeleteTimeline = async () => {
+    if (!timelineId) return;
+    setDeletingTimeline(true);
+    try {
+      await deleteTimelineCompletely(timelineId);
+      qc.invalidateQueries({ queryKey: ["timelines"] });
+      qc.invalidateQueries({ queryKey: ["shared-timelines"] });
+      toast({ title: "Timeline apagada" });
+      navigate("/", { replace: true });
+    } catch (e: any) {
+      toast({ title: "Erro ao apagar", description: e.message, variant: "destructive" });
+      setDeletingTimeline(false);
+      setDeleteTimelineOpen(false);
+    }
+  };
+
+  const handleConfirmDeleteMedia = async () => {
+    if (!mediaToDelete?.storagePath) {
+      setMediaToDelete(null);
+      return;
+    }
+    try {
+      await deleteMedia.mutateAsync({
+        memoryId: mediaToDelete.memoryId,
+        storagePath: mediaToDelete.storagePath,
+      });
+      toast({ title: "Memória apagada" });
+    } catch (e: any) {
+      toast({ title: "Erro ao apagar", description: e.message, variant: "destructive" });
+    } finally {
+      setMediaToDelete(null);
+    }
+  };
+
   const handleUpload = async (files: File[], kind: "photo" | "video") => {
     if (!user || !timelineId) return;
     setSheetOpen(false);
@@ -140,6 +196,17 @@ const TimelineDetail = () => {
         showShare={false}
         showInvite={isOwner}
         onInvite={() => setInviteOpen(true)}
+        menuItems={
+          isOwner
+            ? [
+                {
+                  label: "Deletar timeline",
+                  destructive: true,
+                  onClick: () => setDeleteTimelineOpen(true),
+                },
+              ]
+            : undefined
+        }
       />
       {/* Cover header */}
       <div className="relative w-full h-64 overflow-hidden">
@@ -205,6 +272,8 @@ const TimelineDetail = () => {
 
                   <TimelineMemoryCard
                     item={item}
+                    canDelete={!!user && (isOwner || item.uploaderId === user.id)}
+                    onDelete={() => setMediaToDelete(item)}
                     onOpen={() => {
                       if (item.kind === "note") return;
                       const idx = mediaItems.findIndex((m) => m.id === item.id);
@@ -269,6 +338,53 @@ const TimelineDetail = () => {
           }}
         />
       )}
+
+      <AlertDialog open={deleteTimelineOpen} onOpenChange={setDeleteTimelineOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar timeline?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza? Isso vai apagar a timeline e todas as memórias permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingTimeline}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteTimeline();
+              }}
+              disabled={deletingTimeline}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingTimeline ? "Apagando..." : "Apagar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!mediaToDelete} onOpenChange={(o) => !o && setMediaToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar esta memória?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirmDeleteMedia();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
@@ -276,16 +392,34 @@ const TimelineDetail = () => {
 const TimelineMemoryCard = ({
   item,
   onOpen,
+  canDelete,
+  onDelete,
 }: {
   item: FeedItem;
   onOpen: () => void;
+  canDelete: boolean;
+  onDelete: () => void;
 }) => {
   const dateLabel = formatFullDate(item.createdAt);
 
   if (item.kind === "note") {
     return (
       <article className="bg-card rounded-app border border-border p-4">
-        <p className="text-xs text-muted-foreground mb-2">{dateLabel}</p>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <p className="text-xs text-muted-foreground">{dateLabel}</p>
+          {canDelete && (
+            <button
+              onClick={() => {
+                if ("vibrate" in navigator) navigator.vibrate(10);
+                onDelete();
+              }}
+              className="min-w-[32px] min-h-[32px] flex items-center justify-center rounded-app text-muted-foreground hover:text-destructive active:scale-95 transition"
+              aria-label="Apagar memória"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+        </div>
         <p className="text-foreground whitespace-pre-wrap leading-relaxed">{item.text}</p>
       </article>
     );
@@ -293,12 +427,13 @@ const TimelineMemoryCard = ({
 
   return (
     <article className="bg-card rounded-app border border-border overflow-hidden">
-      <button
-        onClick={onOpen}
-        className="block w-full text-left active:scale-[0.99] transition-transform"
-        aria-label="Abrir mídia"
-      >
-        <div className="relative w-full bg-muted" style={{ height: 240 }}>
+      <div className="relative">
+        <button
+          onClick={onOpen}
+          className="block w-full text-left active:scale-[0.99] transition-transform"
+          aria-label="Abrir mídia"
+        >
+          <div className="relative w-full bg-muted" style={{ height: 240 }}>
           {item.kind === "video" ? (
             <>
               <video
@@ -324,8 +459,22 @@ const TimelineMemoryCard = ({
               style={{ borderRadius: "12px 12px 0 0" }}
             />
           )}
-        </div>
-      </button>
+          </div>
+        </button>
+        {canDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if ("vibrate" in navigator) navigator.vibrate(10);
+              onDelete();
+            }}
+            className="absolute top-2 right-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/60 text-white active:scale-95 transition"
+            aria-label="Apagar memória"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+      </div>
       <div className="p-4">
         <p className="text-xs text-muted-foreground">{dateLabel}</p>
         {item.text && (
