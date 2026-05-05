@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Lock, Layers, Users, type LucideIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const SLIDES: Array<{ title: string; subtitle: string; Icon: LucideIcon }> = [
   {
@@ -27,12 +29,21 @@ const SLIDES: Array<{ title: string; subtitle: string; Icon: LucideIcon }> = [
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [index, setIndex] = useState(0);
   const isLast = index === SLIDES.length - 1;
   const slide = SLIDES[index];
 
-  const finish = () => {
+  const finish = async () => {
     localStorage.setItem("onboarding_seen", "1");
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ onboarding_completed: true })
+        .eq("id", user.id);
+    } else {
+      localStorage.setItem("onboarding_pending_complete", "1");
+    }
   };
 
   const handleContinue = () => {
@@ -40,15 +51,15 @@ const Onboarding = () => {
     setIndex((i) => Math.min(i + 1, SLIDES.length - 1));
   };
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
     if ("vibrate" in navigator) navigator.vibrate(10);
-    finish();
+    await finish();
     navigate("/auth?mode=signup", { replace: true });
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if ("vibrate" in navigator) navigator.vibrate(10);
-    finish();
+    await finish();
     navigate("/auth?mode=signin", { replace: true });
   };
 
