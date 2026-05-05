@@ -92,6 +92,25 @@ const TimelineDetail = () => {
   const timeline = timelineRow ? timelineFromRow(timelineRow) : null;
   const isOwner = !!timelineRow && !!user && timelineRow.user_id === user.id;
   const currentToken = inviteToken ?? timelineRow?.invite_token ?? null;
+  const inviteRole = ((timelineRow as any)?.invite_role ?? "contributor") as "viewer" | "contributor";
+
+  // Fetch the current user's membership role (if any) to know if they can contribute.
+  const { data: memberRole } = useQuery({
+    queryKey: ["timeline-member-role", timelineId, user?.id],
+    enabled: !!timelineId && !!user && !isOwner,
+    queryFn: async (): Promise<string | null> => {
+      const { data, error } = await supabase
+        .from("timeline_members")
+        .select("role")
+        .eq("timeline_id", timelineId!)
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.role ?? null;
+    },
+  });
+
+  const canContribute = isOwner || memberRole === "contributor";
 
   // Cronológico ascendente: mais antigo no topo
   const sortedFeed = useMemo(
@@ -287,21 +306,23 @@ const TimelineDetail = () => {
         )}
       </div>
 
-      {/* FAB */}
-      <button
-        onClick={() => {
-          if ("vibrate" in navigator) navigator.vibrate(10);
-          setSheetOpen(true);
-        }}
-        className="fixed z-40 w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center active:scale-95 transition-transform"
-        style={{
-          bottom: "calc(env(safe-area-inset-bottom) + 24px)",
-          right: "24px",
-        }}
-        aria-label="Adicionar memória"
-      >
-        <Plus size={28} strokeWidth={2.5} />
-      </button>
+      {/* FAB — only owner or contributors can add */}
+      {canContribute && (
+        <button
+          onClick={() => {
+            if ("vibrate" in navigator) navigator.vibrate(10);
+            setSheetOpen(true);
+          }}
+          className="fixed z-40 w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center active:scale-95 transition-transform"
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom) + 24px)",
+            right: "24px",
+          }}
+          aria-label="Adicionar memória"
+        >
+          <Plus size={28} strokeWidth={2.5} />
+        </button>
+      )}
 
       <AddContentSheet
         open={sheetOpen}
@@ -332,6 +353,7 @@ const TimelineDetail = () => {
           timelineId={timeline.id}
           timelineTitle={timeline.title}
           existingToken={currentToken}
+          currentRole={inviteRole}
           onTokenGenerated={(t) => {
             setInviteToken(t);
             qc.invalidateQueries({ queryKey: ["timelines"] });
