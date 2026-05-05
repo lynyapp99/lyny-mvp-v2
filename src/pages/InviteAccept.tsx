@@ -23,6 +23,7 @@ const InviteAccept = () => {
   const [invite, setInvite] = useState<InviteData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
+  const [debugRpc, setDebugRpc] = useState<{ data: unknown; error: unknown } | null>(null);
 
   // Fetch invite
   useEffect(() => {
@@ -38,6 +39,7 @@ const InviteAccept = () => {
           _token: token,
         });
         console.log("Timeline:", { data, error: tlErr });
+        setDebugRpc({ data, error: tlErr });
         if (tlErr) {
           console.error("Erro:", tlErr);
           throw tlErr;
@@ -110,14 +112,39 @@ const InviteAccept = () => {
 
   if (error || !invite) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 text-center">
-        <h1 className="font-display text-2xl font-semibold text-foreground mb-2">
-          Convite inválido
+      <div className="min-h-screen bg-background px-6 py-10 text-foreground">
+        <h1 className="font-display text-xl font-semibold mb-4">
+          Debug — /invite/[token]
         </h1>
-        <p className="text-sm text-muted-foreground mb-6 max-w-xs">
-          Este link de convite não existe ou foi removido.
-        </p>
-        <Button onClick={() => navigate("/")}>Voltar ao início</Button>
+        <div className="space-y-4 text-xs font-mono">
+          <section>
+            <div className="text-muted-foreground mb-1">Token (URL):</div>
+            <pre className="whitespace-pre-wrap break-all bg-muted/30 rounded p-3">
+              {String(token)}
+            </pre>
+          </section>
+          <section>
+            <div className="text-muted-foreground mb-1">RPC get_invite_info — resultado:</div>
+            <pre className="whitespace-pre-wrap break-all bg-muted/30 rounded p-3">
+              {JSON.stringify(debugRpc, null, 2)}
+            </pre>
+          </section>
+          <section>
+            <div className="text-muted-foreground mb-1">Erro (state):</div>
+            <pre className="whitespace-pre-wrap break-all bg-muted/30 rounded p-3">
+              {error ?? "(nenhum)"}
+            </pre>
+          </section>
+          <section>
+            <div className="text-muted-foreground mb-1">Invite (state):</div>
+            <pre className="whitespace-pre-wrap break-all bg-muted/30 rounded p-3">
+              {JSON.stringify(invite, null, 2)}
+            </pre>
+          </section>
+        </div>
+        <div className="mt-6">
+          <Button onClick={() => navigate("/")}>Voltar ao início</Button>
+        </div>
       </div>
     );
   }
