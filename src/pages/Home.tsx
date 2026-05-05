@@ -685,6 +685,28 @@ const Home = () => {
               </div>
             )}
 
+            {/* Shared with me */}
+            {sharedTimelines.length > 0 && (
+              <div className="max-w-md mx-auto px-4 mt-2 mb-8">
+                <div className="mb-3">
+                  <h2 className="text-xl font-bold text-foreground">Compartilhadas comigo</h2>
+                  <p className="text-sm text-foreground/60">Timelines que você foi convidado a ver</p>
+                </div>
+                <div className="grid gap-3">
+                  {sharedTimelines.map((timeline) => (
+                    <TimelineCard
+                      key={timeline.id}
+                      {...timeline}
+                      isHidden={false}
+                      onClick={() => handleTimelineClick(timeline)}
+                      onFavoriteToggle={handleFavoriteToggle}
+                      onLongPress={handleLongPress}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Recent and Favorites Section - Peek visível */}
             <div className="max-w-md mx-auto">
               <div className="max-w-md mx-auto mt-2">
