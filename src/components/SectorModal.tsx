@@ -24,14 +24,14 @@ const colorOptions: Array<{ value: Sector["color"]; label: string; class: string
 ];
 
 const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProps) => {
-  const [name, setName] = useState(editingSector?.name || "");
+  const nameRef = useRef<HTMLInputElement>(null);
   const [selectedColor, setSelectedColor] = useState<Sector["color"]>(editingSector?.color || "pink");
   const [selectedIcon, setSelectedIcon] = useState(editingSector?.emoji || "folder");
 
   const wasOpenRef = useRef(false);
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
-      setName(editingSector?.name || "");
+      if (nameRef.current) nameRef.current.value = editingSector?.name || "";
       setSelectedColor(editingSector?.color || "pink");
       setSelectedIcon(editingSector?.emoji || "folder");
     }
@@ -39,7 +39,8 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
   }, [isOpen, editingSector]);
 
   const handleSave = () => {
-    if (!name.trim()) {
+    const name = nameRef.current?.value.trim() ?? "";
+    if (!name) {
       toast({
         title: "Nome obrigatório",
         description: "Por favor, dê um nome ao seu setor.",
@@ -49,7 +50,7 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
     }
 
     onSave({
-      name: name.trim(),
+      name,
       color: selectedColor,
       emoji: selectedIcon,
     });
@@ -62,7 +63,7 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
     });
 
     onClose();
-    setName("");
+    if (nameRef.current) nameRef.current.value = "";
     setSelectedColor("pink");
     setSelectedIcon("folder");
   };
@@ -81,9 +82,9 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
             <Label htmlFor="sector-name">Nome do Setor</Label>
             <Input
               id="sector-name"
+              ref={nameRef}
               placeholder="Nome do setor"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              defaultValue={editingSector?.name || ""}
               className="rounded-app"
             />
           </div>
