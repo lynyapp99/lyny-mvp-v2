@@ -59,10 +59,8 @@ const Onboarding = () => {
     if (user) {
       await supabase
         .from("profiles")
-        .upsert(
-          { id: user.id, onboarding_completed: true },
-          { onConflict: "id" },
-        );
+        .update({ onboarding_completed: true })
+        .eq("id", user.id);
     } else {
       localStorage.setItem("onboarding_pending_complete", "1");
     }
