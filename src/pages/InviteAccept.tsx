@@ -11,6 +11,7 @@ interface InviteInfo {
   owner_name: string;
   owner_id: string;
   cover_url: string;
+  invite_role: string;
 }
 
 export default function InviteAccept() {
@@ -44,6 +45,7 @@ export default function InviteAccept() {
           owner_name: tl.owner_name || "Alguém",
           owner_id: tl.owner_id,
           cover_url: tl.cover_url,
+          invite_role: (tl as any).invite_role ?? "contributor",
         });
       } catch (e: any) {
         setError(e.message || "Erro ao buscar convite");
@@ -66,7 +68,7 @@ export default function InviteAccept() {
     const { error: memberError } = await supabase.from("timeline_members").upsert({
       timeline_id: invite.timeline_id,
       user_id: user.id,
-      role: "viewer",
+      role: invite.invite_role ?? "contributor",
     }, { onConflict: "timeline_id,user_id" });
     if (memberError) {
       console.error("Erro ao inserir membro:", memberError);
