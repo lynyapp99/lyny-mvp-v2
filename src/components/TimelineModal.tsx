@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,27 +47,38 @@ const TimelineModal = ({
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
+  // Uncontrolled inputs — refs, no re-render per keystroke.
+  const titleRef = useRef<HTMLInputElement>(null);
+  const subtitleRef = useRef<HTMLTextAreaElement>(null);
+  const newSectorNameRef = useRef<HTMLInputElement>(null);
+  const coverFileRef = useRef<File | null>(null);
+
+  // Minimal state for things that genuinely affect render.
   const [sectorChoice, setSectorChoice] = useState<string>(defaultSectorId ?? NO_SECTOR);
-  const [newSectorName, setNewSectorName] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [hasTitle, setHasTitle] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const wasOpenRef = useRef(false);
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
-      setTitle("");
-      setSubtitle("");
+      if (titleRef.current) titleRef.current.value = "";
+      if (subtitleRef.current) subtitleRef.current.value = "";
+      if (newSectorNameRef.current) newSectorNameRef.current.value = "";
+      coverFileRef.current = null;
       setSectorChoice(defaultSectorId ?? NO_SECTOR);
-      setNewSectorName("");
       setCoverPreview(null);
-      setCoverFile(null);
+      setHasTitle(false);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, defaultSectorId]);
+
+  // Transition-only re-render: flips when title becomes empty/non-empty.
+  const onTitleInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
+    const next = e.currentTarget.value.trim().length > 0;
+    setHasTitle((prev) => (prev === next ? prev : next));
+  }, []);
 
   const handlePickCover = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -78,18 +89,21 @@ const TimelineModal = ({
       toast({ title: "Arquivo grande demais", description: "Máximo 10MB.", variant: "destructive" });
       return;
     }
-    setCoverFile(file);
+    coverFileRef.current = file;
     const reader = new FileReader();
     reader.onload = () => setCoverPreview(reader.result as string);
     reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
-    if (!title.trim()) {
+    const title = titleRef.current?.value.trim() ?? "";
+    const subtitle = subtitleRef.current?.value.trim() ?? "";
+    const newSectorName = newSectorNameRef.current?.value.trim() ?? "";
+    if (!title) {
       toast({ title: "Nome obrigatório", description: "Dê um nome à sua timeline.", variant: "destructive" });
       return;
     }
-    if (sectorChoice === NEW_SECTOR && !newSectorName.trim()) {
+    if (sectorChoice === NEW_SECTOR && !newSectorName) {
       toast({ title: "Nome do setor", description: "Digite um nome para o novo setor.", variant: "destructive" });
       return;
     }
@@ -97,6 +111,7 @@ const TimelineModal = ({
     setSaving(true);
     try {
       let coverUrl: string | undefined;
+      const coverFile = coverFileRef.current;
       if (coverFile && user) {
         setUploading(true);
         coverUrl = await uploadTimelineCover(user.id, coverFile);
@@ -111,10 +126,10 @@ const TimelineModal = ({
             : sectorChoice;
 
       await onSave({
-        title: title.trim(),
-        subtitle: subtitle.trim(),
+        title,
+        subtitle,
         sectorId,
-        newSectorName: sectorChoice === NEW_SECTOR ? newSectorName.trim() : undefined,
+        newSectorName: sectorChoice === NEW_SECTOR ? newSectorName : undefined,
         coverUrl,
       });
 
@@ -170,7 +185,7 @@ const TimelineModal = ({
                     aria-label="Remover capa"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCoverFile(null);
+                      coverFileRef.current = null;
                       setCoverPreview(null);
                     }}
                     className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center"
@@ -192,9 +207,10 @@ const TimelineModal = ({
             <Label htmlFor="timeline-title">Nome *</Label>
             <Input
               id="timeline-title"
+              ref={titleRef}
               placeholder="Nome da timeline"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              defaultValue=""
+              onInput={onTitleInput}
               className="rounded-app"
               autoFocus
             />
@@ -205,9 +221,9 @@ const TimelineModal = ({
             <Label htmlFor="timeline-subtitle">Descrição (opcional)</Label>
             <Textarea
               id="timeline-subtitle"
+              ref={subtitleRef}
               placeholder="Uma breve descrição"
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
+              defaultValue=""
               className="rounded-app resize-none"
               rows={3}
             />
@@ -233,9 +249,9 @@ const TimelineModal = ({
 
             {sectorChoice === NEW_SECTOR && (
               <Input
+                ref={newSectorNameRef}
                 placeholder="Nome do novo setor"
-                value={newSectorName}
-                onChange={(e) => setNewSectorName(e.target.value)}
+                defaultValue=""
                 className="rounded-app mt-2"
               />
             )}
@@ -246,7 +262,7 @@ const TimelineModal = ({
           <Button variant="ghost" onClick={onClose} className="rounded-pill" disabled={saving}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} className="rounded-pill" disabled={saving}>
+          <Button onClick={handleSave} className="rounded-pill" disabled={saving || !hasTitle}>
             {saving ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
