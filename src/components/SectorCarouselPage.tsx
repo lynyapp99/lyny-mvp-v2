@@ -132,9 +132,9 @@ const SectorCarouselPage = ({
               <h2 className="text-[17px] font-semibold text-foreground tracking-tight truncate leading-tight">
                 {sector.name}
               </h2>
-              <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full bg-foreground/5 border border-white/5 text-[11px] text-foreground/60 font-medium">
+              <p className="mt-1.5 text-[11px] font-normal text-foreground/40 tracking-wide leading-none">
                 {timelines.length} {timelines.length === 1 ? "timeline" : "timelines"}
-              </span>
+              </p>
             </div>
           </div>
         </header>
