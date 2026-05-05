@@ -40,7 +40,6 @@ const TimelineDetail = () => {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [uploads, setUploads] = useState<Upload[]>([]);
@@ -107,7 +106,7 @@ const TimelineDetail = () => {
     <div className="min-h-screen bg-background pb-32">
       <ContextHeader
         title={timeline.title}
-        onShare={() => setShareOpen(true)}
+        showShare={false}
         showInvite={isOwner}
         onInvite={() => setInviteOpen(true)}
       />
@@ -225,13 +224,6 @@ const TimelineDetail = () => {
           onNavigate={setViewerIndex}
         />
       )}
-
-      <ShareSheet
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-        timelineId={timeline.id}
-        timelineTitle={timeline.title}
-      />
 
       {isOwner && (
         <InviteSheet
