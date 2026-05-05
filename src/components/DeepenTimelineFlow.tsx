@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowLeft, Layers, Star, Folder, Palette, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TimelineSelector from "./TimelineSelector";
@@ -14,16 +14,11 @@ type Step = "selectTimeline" | "selectFeature" | "createSubcategory" | "createMi
 type DeepenFeature = "subcategories" | "milestones" | "mediaOrganization" | "privacyOverrides" | "designPersonalization";
 
 interface SubcategoryData {
-  name: string;
-  description: string;
   color: string;
   emoji: string;
 }
 
 interface MilestoneData {
-  title: string;
-  date: string;
-  description: string;
   coverImage: string;
   isSpecial: boolean;
 }
@@ -33,18 +28,18 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
   const [selectedTimeline, setSelectedTimeline] = useState<Timeline | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<DeepenFeature | null>(null);
   const [subcategoryData, setSubcategoryData] = useState<SubcategoryData>({
-    name: "",
-    description: "",
     color: "blue",
     emoji: "📁",
   });
   const [milestoneData, setMilestoneData] = useState<MilestoneData>({
-    title: "",
-    date: "",
-    description: "",
     coverImage: "",
     isSpecial: false,
   });
+  const subNameRef = useRef<HTMLInputElement>(null);
+  const subDescRef = useRef<HTMLTextAreaElement>(null);
+  const milestoneTitleRef = useRef<HTMLInputElement>(null);
+  const milestoneDateRef = useRef<HTMLInputElement>(null);
+  const milestoneDescRef = useRef<HTMLTextAreaElement>(null);
 
   const deepenFeatures = [
     {
@@ -248,10 +243,10 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
               Subcategory Name
             </label>
             <input
+              ref={subNameRef}
               type="text"
               placeholder="e.g., Date Night Restaurants"
-              value={subcategoryData.name}
-              onChange={(e) => setSubcategoryData({ ...subcategoryData, name: e.target.value })}
+              defaultValue=""
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground placeholder:text-muted-foreground
                        focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
@@ -264,9 +259,9 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
               Description
             </label>
             <textarea
+              ref={subDescRef}
               placeholder="What memories will be organized here?"
-              value={subcategoryData.description}
-              onChange={(e) => setSubcategoryData({ ...subcategoryData, description: e.target.value })}
+              defaultValue=""
               rows={3}
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground placeholder:text-muted-foreground resize-none
@@ -305,10 +300,7 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
           </div>
 
           {/* Create Button */}
-          <Button 
-            className="w-full py-3 rounded-2xl font-medium"
-            disabled={!subcategoryData.name.trim()}
-          >
+          <Button className="w-full py-3 rounded-2xl font-medium">
             Create Subcategory
           </Button>
         </div>
@@ -339,10 +331,10 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
               Milestone Title
             </label>
             <input
+              ref={milestoneTitleRef}
               type="text"
               placeholder="e.g., Our First Anniversary"
-              value={milestoneData.title}
-              onChange={(e) => setMilestoneData({ ...milestoneData, title: e.target.value })}
+              defaultValue=""
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground placeholder:text-muted-foreground
                        focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
@@ -355,9 +347,9 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
               Date
             </label>
             <input
+              ref={milestoneDateRef}
               type="date"
-              value={milestoneData.date}
-              onChange={(e) => setMilestoneData({ ...milestoneData, date: e.target.value })}
+              defaultValue=""
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
             />
@@ -369,9 +361,9 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
               Description
             </label>
             <textarea
+              ref={milestoneDescRef}
               placeholder="Tell the story of this milestone..."
-              value={milestoneData.description}
-              onChange={(e) => setMilestoneData({ ...milestoneData, description: e.target.value })}
+              defaultValue=""
               rows={4}
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground placeholder:text-muted-foreground resize-none
@@ -404,10 +396,7 @@ const DeepenTimelineFlow = ({ onBack }: DeepenTimelineFlowProps) => {
           </div>
 
           {/* Create Button */}
-          <Button 
-            className="w-full py-3 rounded-2xl font-medium"
-            disabled={!milestoneData.title.trim() || !milestoneData.date}
-          >
+          <Button className="w-full py-3 rounded-2xl font-medium">
             Create Milestone
           </Button>
         </div>
