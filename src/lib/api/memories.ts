@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 export type FeedItem = {
   id: string;
+  memoryId: string;
+  uploaderId: string | null;
   kind: "note" | "photo" | "video";
   text: string | null;
   mediaUrl: string | null;
@@ -18,7 +20,7 @@ export const useTimelineMemories = (timelineId: string | undefined) => {
     queryFn: async (): Promise<FeedItem[]> => {
       const { data, error } = await supabase
         .from("memories")
-        .select("id, description, kind, created_at, memory_media(kind, public_url, storage_path, position)")
+        .select("id, user_id, description, kind, created_at, memory_media(user_id, kind, public_url, storage_path, position)")
         .eq("timeline_id", timelineId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -27,6 +29,8 @@ export const useTimelineMemories = (timelineId: string | undefined) => {
         if (m.kind === "note") {
           items.push({
             id: m.id,
+            memoryId: m.id,
+            uploaderId: m.user_id,
             kind: "note",
             text: m.description,
             mediaUrl: null,
@@ -38,6 +42,8 @@ export const useTimelineMemories = (timelineId: string | undefined) => {
           for (const mm of media) {
             items.push({
               id: `${m.id}:${mm.storage_path}`,
+              memoryId: m.id,
+              uploaderId: mm.user_id ?? m.user_id,
               kind: mm.kind === "video" ? "video" : "photo",
               text: m.description,
               mediaUrl: mm.public_url,
