@@ -11,6 +11,7 @@ import PublicProfileSettings from "@/components/PublicProfileSettings";
 import PublicProfileView from "@/components/PublicProfileView";
 import SettingsScreen from "@/components/SettingsScreen";
 import HiddenTimelinesAccess from "@/components/HiddenTimelinesAccess";
+import AppHeader from "@/components/AppHeader";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useTimelines } from "@/lib/api/timelines";
@@ -120,13 +121,10 @@ const Profile = () => {
   // Main Profile View - Focused on Public Profile
   return (
     <div className="min-h-screen bg-background pb-20">
+      <AppHeader />
       <div className="max-w-md mx-auto px-4 py-6">
         {/* Header with Settings Gear */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="font-display font-semibold text-3xl text-foreground">Perfil</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Sua identidade compartilhável</p>
-          </div>
+        <div className="flex items-center justify-end mb-6">
           <IOSButton
             variant="ghost"
             size="icon"
