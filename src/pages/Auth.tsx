@@ -74,12 +74,12 @@ const Auth = () => {
     }
   }, [session, from, navigate, successName]);
 
-  // After success screen, navigate to onboarding
+  // After success screen, clear it so the session-based redirect takes over.
   useEffect(() => {
     if (!successName) return;
-    const t = setTimeout(() => navigate("/onboarding", { replace: true }), 2000);
+    const t = setTimeout(() => setSuccessName(null), 1800);
     return () => clearTimeout(t);
-  }, [successName, navigate]);
+  }, [successName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
