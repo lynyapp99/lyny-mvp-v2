@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface InviteInfo {
   timeline_id: string;
@@ -15,6 +16,7 @@ interface InviteInfo {
 export default function InviteAccept() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [invite, setInvite] = useState<InviteInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +68,9 @@ export default function InviteAccept() {
       user_id: user.id,
       role: "viewer",
     }, { onConflict: "timeline_id,user_id" });
+    console.log("[invite] accepted, navigating to timeline:", invite.timeline_id);
+    await qc.invalidateQueries({ queryKey: ["timelines"] });
+    await qc.invalidateQueries({ queryKey: ["shared-timelines"] });
     navigate("/timeline/" + invite.timeline_id);
   };
 

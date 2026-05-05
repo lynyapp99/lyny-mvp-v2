@@ -4,7 +4,7 @@ import { Plus, Play } from "lucide-react";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useTimelines } from "@/lib/api/timelines";
+import { useTimelines, useSharedTimelines } from "@/lib/api/timelines";
 import { timelineFromRow } from "@/lib/api/adapters";
 import { useTimelineMemories, useCreateNote, uploadTimelineMedia, type FeedItem } from "@/lib/api/memories";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,7 +34,9 @@ const TimelineDetail = () => {
   const { toast } = useToast();
   const qc = useQueryClient();
 
-  const { data: timelineRows = [] } = useTimelines();
+  const { data: ownRows = [] } = useTimelines();
+  const { data: sharedRows = [] } = useSharedTimelines();
+  const timelineRows = useMemo(() => [...ownRows, ...sharedRows], [ownRows, sharedRows]);
   const { data: feed = [] } = useTimelineMemories(timelineId);
   const createNote = useCreateNote(timelineId ?? "");
 
