@@ -300,6 +300,7 @@ export type Database = {
           created_at: string
           favorite: boolean
           id: string
+          invite_role: string
           invite_token: string | null
           is_hidden: boolean
           privacy: Database["public"]["Enums"]["timeline_privacy"]
@@ -315,6 +316,7 @@ export type Database = {
           created_at?: string
           favorite?: boolean
           id?: string
+          invite_role?: string
           invite_token?: string | null
           is_hidden?: boolean
           privacy?: Database["public"]["Enums"]["timeline_privacy"]
@@ -330,6 +332,7 @@ export type Database = {
           created_at?: string
           favorite?: boolean
           id?: string
+          invite_role?: string
           invite_token?: string | null
           is_hidden?: boolean
           privacy?: Database["public"]["Enums"]["timeline_privacy"]
@@ -359,6 +362,7 @@ export type Database = {
         Args: { _token: string }
         Returns: {
           cover_url: string
+          invite_role: string
           owner_id: string
           owner_name: string
           timeline_id: string
