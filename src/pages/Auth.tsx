@@ -59,12 +59,13 @@ const Auth = () => {
   useEffect(() => {
     if (session && !successName) {
       (async () => {
+        const pending = localStorage.getItem("onboarding_pending_complete") === "1";
         const { data } = await supabase
           .from("profiles")
           .select("onboarding_completed")
           .eq("id", session.user.id)
           .maybeSingle();
-        if (data?.onboarding_completed) {
+        if (data?.onboarding_completed || pending) {
           navigate(from, { replace: true });
         } else {
           navigate("/onboarding", { replace: true });
