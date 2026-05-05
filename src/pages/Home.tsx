@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import SearchBar, { SearchFilters } from "@/components/SearchBar";
 import TimelineCard from "@/components/TimelineCard";
@@ -40,7 +40,10 @@ const Home = () => {
   const deleteSector = useDeleteSector();
   const createTimelineMut = useCreateTimeline();
 
-  const { sectors: dbSectors, timelines: allTimelines } = buildSectorsWithTimelines(sectorRows, timelineRows);
+  const { sectors: dbSectors, timelines: allTimelines } = useMemo(
+    () => buildSectorsWithTimelines(sectorRows, timelineRows),
+    [sectorRows, timelineRows]
+  );
   const getTimelinesBySector = (id: string) => allTimelines.filter((t) => t.sectorId === id);
   const searchTimelines = (q: string) => {
     const lq = q.toLowerCase();
