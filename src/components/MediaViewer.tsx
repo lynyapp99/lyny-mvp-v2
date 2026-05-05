@@ -40,7 +40,7 @@ const MediaViewer = ({ items, index, onClose, onNavigate }: Props) => {
 
   if (!item) return null;
 
-  const dist = (a: Touch, b: Touch) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  const dist = (a: React.Touch, b: React.Touch) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
 
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
