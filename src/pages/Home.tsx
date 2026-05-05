@@ -8,8 +8,8 @@ import SettingsScreen from "@/components/SettingsScreen";
 import { useHiddenTimelineSession } from "@/hooks/useHiddenTimelineSession";
 import RecentAndFavorites from "@/components/RecentAndFavorites";
 import type { Timeline, Sector } from "@/types/timeline";
-import { useSectors, useTimelines, useCreateSector, useDeleteSector, useCreateTimeline } from "@/lib/api/timelines";
-import { buildSectorsWithTimelines } from "@/lib/api/adapters";
+import { useSectors, useTimelines, useCreateSector, useDeleteSector, useCreateTimeline, useSharedTimelines } from "@/lib/api/timelines";
+import { buildSectorsWithTimelines, timelineFromRow } from "@/lib/api/adapters";
 import { useProfile } from "@/lib/api/timelines";
 import { useAuth } from "@/hooks/useAuth";
 import SectorCarouselPage from "@/components/SectorCarouselPage";
@@ -35,6 +35,7 @@ const Home = () => {
   const { data: profile } = useProfile();
   const { data: sectorRows = [] } = useSectors();
   const { data: timelineRows = [] } = useTimelines();
+  const { data: sharedTimelineRows = [] } = useSharedTimelines();
   const createSector = useCreateSector();
   const deleteSector = useDeleteSector();
   const createTimelineMut = useCreateTimeline();
@@ -42,6 +43,10 @@ const Home = () => {
   const { sectors: dbSectors, timelines: allTimelines } = useMemo(
     () => buildSectorsWithTimelines(sectorRows, timelineRows),
     [sectorRows, timelineRows]
+  );
+  const sharedTimelines = useMemo(
+    () => sharedTimelineRows.map(timelineFromRow),
+    [sharedTimelineRows]
   );
   const getTimelinesBySector = (id: string) => allTimelines.filter((t) => t.sectorId === id);
   const searchTimelines = (q: string) => {
