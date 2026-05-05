@@ -75,6 +75,8 @@ const InviteSheet = ({ open, onOpenChange, timelineId, timelineTitle, existingTo
       return;
     }
     qc.invalidateQueries({ queryKey: ["timelines"] });
+    qc.invalidateQueries({ queryKey: ["shared-timelines"] });
+    qc.invalidateQueries({ queryKey: ["timeline", timelineId] });
   };
 
   const handleCopy = async () => {
