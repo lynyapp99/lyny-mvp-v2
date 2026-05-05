@@ -1,56 +1,74 @@
-## Root cause
+## Objetivo
 
-The `handle_new_user()` function exists but **no trigger is attached** to `auth.users`. New signups never get a `profiles` row, so:
-- `RequireAuth` reads `onboarding_completed` → `null` → treats as false → sends user to `/onboarding`.
-- `Onboarding.finish()` runs `UPDATE profiles … WHERE id = user.id` → **0 rows** affected → flag never persists → loop back to `/onboarding` on every navigation.
+Permitir que o dono delete uma timeline inteira e que o dono ou o autor de uma mídia a apague (com arquivo do Storage).
 
-Session is already the source of truth; the bug is that the profile row required to read the flag doesn't exist.
+---
 
-## Changes
+## 1. Banco — RLS e CASCADE
 
-### 1. SQL migration
-- Create the missing trigger:
-  ```sql
-  create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
-  ```
-- Make `handle_new_user()` idempotent: append `on conflict (id) do nothing` to the insert (safe for re-runs and OAuth edge cases).
-- Backfill profiles for the 7 existing users that don't have one, generating a unique username from email + short id suffix.
+Hoje as tabelas não têm foreign keys declaradas (verifiquei no schema), então deletar uma timeline **não** apaga `memories`, `memory_media` nem `timeline_members` automaticamente. Além disso, a policy de DELETE em `memory_media` só permite o autor (`auth.uid() = user_id`), bloqueando o dono da timeline.
 
-### 2. `src/pages/Onboarding.tsx`
-- Replace `update profiles set onboarding_completed = true` with `upsert({ id: user.id, onboarding_completed: true })` so the flag persists even if the row is missing.
+**Migration nova:**
 
-### 3. `src/hooks/useAuth.tsx`
-- Same change: when consuming the `onboarding_pending_complete` localStorage flag after a new session, use `upsert` instead of `update`.
+- Adicionar foreign keys com `ON DELETE CASCADE`:
+  - `timeline_members.timeline_id` → `timelines.id`
+  - `memories.timeline_id` → `timelines.id`
+  - `memory_media.memory_id` → `memories.id`
+- Atualizar a policy DELETE de `memory_media` para permitir também o dono da timeline (via `is_timeline_owner` na timeline da memory).
+- Atualizar a policy DELETE de `memories` (hoje só `auth.uid() = user_id`) para permitir também o dono da timeline.
 
-### 4. `src/components/RequireAuth.tsx`
-- If `session` exists but the profile select returns `null`, perform a one-shot `upsert({ id, onboarding_completed: false })` and use the new value to decide. Prevents the loop for any user that somehow lacks a row.
+Observação: o Storage **não** é apagado por CASCADE do banco — os arquivos são removidos no client antes do delete da memory/timeline.
 
-### 5. `src/pages/Auth.tsx`
-- After `signUp`, branch on `data.session`:
-  - If a session was created (email confirmation off) → let the existing `useEffect` redirect (`/onboarding` for new accounts because the trigger sets the flag to false).
-  - If no session (confirmation required) → show a "verifique seu e-mail" screen instead of the temporary success splash, no redirect.
-- Drop the artificial 1.8 s timeout that hides the success screen; the redirect happens naturally as soon as the session arrives.
+---
 
-### 6. Tests (`src/test/RequireAuth.test.tsx`)
-- Add a regression case: session present + profile row missing → component upserts and renders `/onboarding`, not a redirect loop.
-- Add a case for the auth-page bounce: simulate a logged-in user landing on `/auth` and assert they get sent to `/home` (onboarded) or `/onboarding` (not). Extract the redirect-target decision into a small `useAuthRedirectTarget` hook so it's testable in isolation, and reuse it in both `Auth.tsx` and `Splash.tsx`.
+## 2. Deletar timeline (dono)
 
-## Mental verification
-- New signup (no email confirm): trigger creates profile (flag=false) → session redirect → `/onboarding` → finish upserts true → `/home`. ✓
-- New signup (email confirm on): no session → "check your email" screen, no redirect. After confirm + sign-in: same as above. ✓
-- Existing user without profile row: backfill adds it; if backfill missed someone, `RequireAuth` upserts on the fly. ✓
-- Onboarded user opens app: `Splash` reads flag true → `/home`. ✓
-- Logged-in user hits `/auth`: `useEffect` redirects to `/home` or `/onboarding`. ✓
-- Anonymous user hits `/home`: `RequireAuth` redirects to `/auth`. ✓
+**`src/components/ContextHeader.tsx`**
+- Nova prop opcional `menuItems?: { label: string; onClick: () => void; destructive?: boolean }[]`.
+- Quando houver itens, renderiza um botão de 3 pontinhos (ícone `MoreVertical`) ao lado do convidar, abrindo um `DropdownMenu` (já existe em `components/ui/dropdown-menu.tsx`).
 
-## Files touched
-- `supabase/migrations/<new>.sql`
-- `src/pages/Onboarding.tsx`
-- `src/hooks/useAuth.tsx`
-- `src/components/RequireAuth.tsx`
-- `src/pages/Auth.tsx`
-- `src/pages/Splash.tsx` (use shared hook)
-- `src/hooks/useAuthRedirectTarget.ts` (new)
-- `src/test/RequireAuth.test.tsx`
+**`src/pages/TimelineDetail.tsx`**
+- Se `isOwner`, passar item "Deletar timeline" (destrutivo) para o header.
+- Ao clicar: abrir `AlertDialog` ("Tem certeza? Isso vai apagar a timeline e todas as memórias permanentemente.").
+- Ao confirmar:
+  1. Buscar todas as `storage_path` das mídias da timeline (`memory_media` via join com `memories` por `timeline_id`).
+  2. `supabase.storage.from("memories").remove(paths)` em lote.
+  3. `delete from timelines where id = …` (CASCADE remove members/memories/memory_media).
+  4. Invalidar `["timelines"]` e `["shared-timelines"]`.
+  5. Toast de sucesso e `navigate("/", { replace: true })`.
+
+---
+
+## 3. Deletar mídia (dono ou autor)
+
+**`src/lib/api/memories.ts`**
+- Estender `FeedItem` com `memoryId: string` e `uploaderId: string | null`.
+- Atualizar o select para trazer `memory_media(user_id, ...)` e popular os novos campos.
+- Adicionar hook `useDeleteMedia(timelineId)`:
+  - Recebe `{ memoryId, storagePath }`.
+  - `supabase.storage.from("memories").remove([storagePath])`.
+  - `delete from memory_media where memory_id = … and storage_path = …`.
+  - Se a memory ficou sem mídias e é `kind = 'media'`, deleta a memory também (mantém o feed limpo).
+  - Invalida `["memories", timelineId]`.
+
+**`src/pages/TimelineDetail.tsx` — `TimelineMemoryCard`**
+- Receber props `canDelete: boolean` e `onDelete: () => void`.
+- Para itens com mídia, sobrepor um botão de lixeira (ícone `Trash2`) no canto superior direito da imagem/vídeo (44×44 touch target, fundo `bg-black/60`, vibração leve no toque).
+- Mostrar somente se `canDelete = isOwner || item.uploaderId === user.id`.
+- Ao clicar: abrir `AlertDialog` "Apagar esta memória?". Se confirmar, chamar `useDeleteMedia`.
+
+Notas de UX/design (memória do projeto):
+- Sem autoplay/scroll programático; apenas reações ao toque do usuário.
+- Toques mínimos 44×44, vibração `navigator.vibrate(10)` no clique.
+- Cores via tokens semânticos (`destructive`, `background`, etc.), nada de cores hardcoded.
+
+---
+
+## Arquivos tocados
+
+- `supabase/migrations/<novo>.sql` (FKs CASCADE + policies DELETE atualizadas)
+- `src/components/ContextHeader.tsx` (menu de 3 pontinhos)
+- `src/pages/TimelineDetail.tsx` (item de menu, dialogs, botão lixeira por mídia)
+- `src/lib/api/memories.ts` (campos extras no FeedItem + hook `useDeleteMedia`)
+
+Nenhuma outra funcionalidade é alterada.
