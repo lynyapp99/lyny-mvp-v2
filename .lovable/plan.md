@@ -1,74 +1,61 @@
-## Objetivo
+# Controle de permissão no convite (viewer / contributor)
 
-Permitir que o dono delete uma timeline inteira e que o dono ou o autor de uma mídia a apague (com arquivo do Storage).
+## 1. Migration (banco)
 
----
+```sql
+ALTER TABLE timelines
+  ADD COLUMN IF NOT EXISTS invite_role text NOT NULL DEFAULT 'contributor';
 
-## 1. Banco — RLS e CASCADE
+-- Atualizar get_invite_info para retornar invite_role
+CREATE OR REPLACE FUNCTION public.get_invite_info(_token text)
+RETURNS TABLE(
+  timeline_id uuid, timeline_title text, timeline_subtitle text,
+  cover_url text, owner_id uuid, owner_name text, invite_role text
+)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
+AS $$
+  SELECT t.id, t.title, t.subtitle, t.cover_url, t.user_id,
+         COALESCE(p.display_name, p.username, 'Alguém'),
+         COALESCE(t.invite_role, 'contributor')
+  FROM public.timelines t
+  LEFT JOIN public.profiles p ON p.id = t.user_id
+  WHERE t.invite_token = _token
+  LIMIT 1
+$$;
+```
 
-Hoje as tabelas não têm foreign keys declaradas (verifiquei no schema), então deletar uma timeline **não** apaga `memories`, `memory_media` nem `timeline_members` automaticamente. Além disso, a policy de DELETE em `memory_media` só permite o autor (`auth.uid() = user_id`), bloqueando o dono da timeline.
+Policy de INSERT em `memory_media` / `memories` hoje exige `auth.uid() = user_id` — já permite que qualquer membro insira mídias próprias. Mas o SELECT só permite ver via `is_timeline_member`, então precisamos garantir que contributors também sejam membros (já são, via `timeline_members`). Sem mudanças adicionais de RLS.
 
-**Migration nova:**
+## 2. `src/components/InviteSheet.tsx` (quem convida)
 
-- Adicionar foreign keys com `ON DELETE CASCADE`:
-  - `timeline_members.timeline_id` → `timelines.id`
-  - `memories.timeline_id` → `timelines.id`
-  - `memory_media.memory_id` → `memories.id`
-- Atualizar a policy DELETE de `memory_media` para permitir também o dono da timeline (via `is_timeline_owner` na timeline da memory).
-- Atualizar a policy DELETE de `memories` (hoje só `auth.uid() = user_id`) para permitir também o dono da timeline.
+- Aceitar nova prop `currentRole: 'viewer' | 'contributor'` (lido do `timelineRow.invite_role`).
+- Adicionar bloco antes do link, somente quando `token` já existe:
+  - Label: "Quem aceitar poderá:"
+  - Duas opções estilo lista (radio cards, 44×44 mínimo, vibrate(10)):
+    - 👁 Apenas visualizar (`viewer`)
+    - 📸 Visualizar e adicionar fotos (`contributor`, padrão)
+  - Ao trocar: `supabase.from('timelines').update({ invite_role: novo }).eq('id', timelineId)`, otimista local + invalidar `["timelines"]`. Toast em erro.
 
-Observação: o Storage **não** é apagado por CASCADE do banco — os arquivos são removidos no client antes do delete da memory/timeline.
+## 3. `src/pages/TimelineDetail.tsx`
 
----
+- Passar `currentRole={timelineRow.invite_role ?? 'contributor'}` ao `InviteSheet`.
+- Calcular permissão do usuário atual:
+  - `isOwner` (já existe).
+  - Buscar `userRole` em `timeline_members` para o `user.id` atual (via `useQuery` simples, ou já incluir no fetch existente). 
+  - `canContribute = isOwner || userRole === 'contributor'`.
+- Esconder o FAB de adicionar (`<button … aria-label="Adicionar memória">`) quando `!canContribute`. Igual para o `AddContentSheet`.
 
-## 2. Deletar timeline (dono)
+## 4. `src/pages/InviteAccept.tsx`
 
-**`src/components/ContextHeader.tsx`**
-- Nova prop opcional `menuItems?: { label: string; onClick: () => void; destructive?: boolean }[]`.
-- Quando houver itens, renderiza um botão de 3 pontinhos (ícone `MoreVertical`) ao lado do convidar, abrindo um `DropdownMenu` (já existe em `components/ui/dropdown-menu.tsx`).
-
-**`src/pages/TimelineDetail.tsx`**
-- Se `isOwner`, passar item "Deletar timeline" (destrutivo) para o header.
-- Ao clicar: abrir `AlertDialog` ("Tem certeza? Isso vai apagar a timeline e todas as memórias permanentemente.").
-- Ao confirmar:
-  1. Buscar todas as `storage_path` das mídias da timeline (`memory_media` via join com `memories` por `timeline_id`).
-  2. `supabase.storage.from("memories").remove(paths)` em lote.
-  3. `delete from timelines where id = …` (CASCADE remove members/memories/memory_media).
-  4. Invalidar `["timelines"]` e `["shared-timelines"]`.
-  5. Toast de sucesso e `navigate("/", { replace: true })`.
-
----
-
-## 3. Deletar mídia (dono ou autor)
-
-**`src/lib/api/memories.ts`**
-- Estender `FeedItem` com `memoryId: string` e `uploaderId: string | null`.
-- Atualizar o select para trazer `memory_media(user_id, ...)` e popular os novos campos.
-- Adicionar hook `useDeleteMedia(timelineId)`:
-  - Recebe `{ memoryId, storagePath }`.
-  - `supabase.storage.from("memories").remove([storagePath])`.
-  - `delete from memory_media where memory_id = … and storage_path = …`.
-  - Se a memory ficou sem mídias e é `kind = 'media'`, deleta a memory também (mantém o feed limpo).
-  - Invalida `["memories", timelineId]`.
-
-**`src/pages/TimelineDetail.tsx` — `TimelineMemoryCard`**
-- Receber props `canDelete: boolean` e `onDelete: () => void`.
-- Para itens com mídia, sobrepor um botão de lixeira (ícone `Trash2`) no canto superior direito da imagem/vídeo (44×44 touch target, fundo `bg-black/60`, vibração leve no toque).
-- Mostrar somente se `canDelete = isOwner || item.uploaderId === user.id`.
-- Ao clicar: abrir `AlertDialog` "Apagar esta memória?". Se confirmar, chamar `useDeleteMedia`.
-
-Notas de UX/design (memória do projeto):
-- Sem autoplay/scroll programático; apenas reações ao toque do usuário.
-- Toques mínimos 44×44, vibração `navigator.vibrate(10)` no clique.
-- Cores via tokens semânticos (`destructive`, `background`, etc.), nada de cores hardcoded.
-
----
+- `InviteInfo` ganha `invite_role: string`.
+- Ao popular `setInvite`, incluir `invite_role: tl.invite_role ?? 'contributor'`.
+- No `upsert` de `timeline_members`, usar `role: invite.invite_role ?? 'contributor'` em vez do hardcoded `"viewer"`.
 
 ## Arquivos tocados
 
-- `supabase/migrations/<novo>.sql` (FKs CASCADE + policies DELETE atualizadas)
-- `src/components/ContextHeader.tsx` (menu de 3 pontinhos)
-- `src/pages/TimelineDetail.tsx` (item de menu, dialogs, botão lixeira por mídia)
-- `src/lib/api/memories.ts` (campos extras no FeedItem + hook `useDeleteMedia`)
+- `supabase/migrations/<novo>.sql` — coluna + função `get_invite_info`
+- `src/components/InviteSheet.tsx` — seletor de papel + update
+- `src/pages/InviteAccept.tsx` — usar invite_role no upsert
+- `src/pages/TimelineDetail.tsx` — esconder FAB para viewers, passar role ao InviteSheet
 
 Nenhuma outra funcionalidade é alterada.
