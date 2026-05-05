@@ -255,12 +255,52 @@ export type Database = {
         }
         Relationships: []
       }
+      timeline_members: {
+        Row: {
+          id: string
+          joined_at: string
+          role: string
+          timeline_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role?: string
+          timeline_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: string
+          timeline_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_members_timeline_id_fkey"
+            columns: ["timeline_id"]
+            isOneToOne: false
+            referencedRelation: "timelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timelines: {
         Row: {
           cover_url: string | null
           created_at: string
           favorite: boolean
           id: string
+          invite_token: string | null
           is_hidden: boolean
           privacy: Database["public"]["Enums"]["timeline_privacy"]
           sector_id: string | null
@@ -275,6 +315,7 @@ export type Database = {
           created_at?: string
           favorite?: boolean
           id?: string
+          invite_token?: string | null
           is_hidden?: boolean
           privacy?: Database["public"]["Enums"]["timeline_privacy"]
           sector_id?: string | null
@@ -289,6 +330,7 @@ export type Database = {
           created_at?: string
           favorite?: boolean
           id?: string
+          invite_token?: string | null
           is_hidden?: boolean
           privacy?: Database["public"]["Enums"]["timeline_privacy"]
           sector_id?: string | null
@@ -313,7 +355,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_timeline_owner: {
+        Args: { _timeline_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       media_kind: "image" | "video"
