@@ -46,7 +46,7 @@ const InviteSheet = ({ open, onOpenChange, timelineId, timelineTitle, existingTo
   }, [open, token, loading, timelineId, onTokenGenerated, toast, onOpenChange]);
 
   const haptic = () => "vibrate" in navigator && navigator.vibrate(10);
-  const APP_URL = "https://dear-moments-together.lovable.app";
+  const APP_URL = "https://lyny.app";
   const link = token ? `${APP_URL}/invite/${token}` : "";
 
   const handleCopy = async () => {
