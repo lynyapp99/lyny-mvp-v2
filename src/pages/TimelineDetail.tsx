@@ -4,7 +4,9 @@ import { Plus, Play } from "lucide-react";
 import { IOSButton } from "@/components/ui/ios-button";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useTimelines, useSharedTimelines } from "@/lib/api/timelines";
+import { useTimelines, useSharedTimelines, type TimelineRow } from "@/lib/api/timelines";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { timelineFromRow } from "@/lib/api/adapters";
 import { useTimelineMemories, useCreateNote, uploadTimelineMedia, type FeedItem } from "@/lib/api/memories";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,8 +36,8 @@ const TimelineDetail = () => {
   const { toast } = useToast();
   const qc = useQueryClient();
 
-  const { data: ownRows = [] } = useTimelines();
-  const { data: sharedRows = [] } = useSharedTimelines();
+  const { data: ownRows = [], isLoading: loadingOwn } = useTimelines();
+  const { data: sharedRows = [], isLoading: loadingShared } = useSharedTimelines();
   const timelineRows = useMemo(() => [...ownRows, ...sharedRows], [ownRows, sharedRows]);
   const { data: feed = [] } = useTimelineMemories(timelineId);
   const createNote = useCreateNote(timelineId ?? "");
@@ -47,8 +49,25 @@ const TimelineDetail = () => {
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
-  const timeline = timelineRows.map(timelineFromRow).find((t) => t.id === timelineId);
-  const timelineRow = timelineRows.find((t) => t.id === timelineId);
+  const cachedRow = timelineRows.find((t) => t.id === timelineId);
+
+  // Fallback: fetch directly if not in any cache (e.g., right after accepting an invite)
+  const { data: directRow, isLoading: loadingDirect } = useQuery({
+    queryKey: ["timeline", timelineId, user?.id],
+    enabled: !!timelineId && !!user && !cachedRow && !loadingOwn && !loadingShared,
+    queryFn: async (): Promise<TimelineRow | null> => {
+      const { data, error } = await supabase
+        .from("timelines")
+        .select("*")
+        .eq("id", timelineId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const timelineRow = cachedRow ?? directRow ?? null;
+  const timeline = timelineRow ? timelineFromRow(timelineRow) : null;
   const isOwner = !!timelineRow && !!user && timelineRow.user_id === user.id;
   const currentToken = inviteToken ?? timelineRow?.invite_token ?? null;
 
@@ -58,6 +77,16 @@ const TimelineDetail = () => {
     [feed],
   );
   const mediaItems = useMemo(() => sortedFeed.filter((i) => i.kind !== "note"), [sortedFeed]);
+
+  const stillLoading = loadingOwn || loadingShared || loadingDirect;
+
+  if (!timeline && stillLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando timeline...</p>
+      </div>
+    );
+  }
 
   if (!timeline) {
     return (
