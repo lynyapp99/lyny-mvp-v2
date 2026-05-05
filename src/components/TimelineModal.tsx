@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +56,6 @@ const TimelineModal = ({
   // Minimal state for things that genuinely affect render.
   const [sectorChoice, setSectorChoice] = useState<string>(defaultSectorId ?? NO_SECTOR);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [hasTitle, setHasTitle] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -69,16 +68,9 @@ const TimelineModal = ({
       coverFileRef.current = null;
       setSectorChoice(defaultSectorId ?? NO_SECTOR);
       setCoverPreview(null);
-      setHasTitle(false);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, defaultSectorId]);
-
-  // Transition-only re-render: flips when title becomes empty/non-empty.
-  const onTitleInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
-    const next = e.currentTarget.value.trim().length > 0;
-    setHasTitle((prev) => (prev === next ? prev : next));
-  }, []);
 
   const handlePickCover = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -210,9 +202,7 @@ const TimelineModal = ({
               ref={titleRef}
               placeholder="Nome da timeline"
               defaultValue=""
-              onInput={onTitleInput}
               className="rounded-app"
-              autoFocus
             />
           </div>
 
@@ -262,7 +252,7 @@ const TimelineModal = ({
           <Button variant="ghost" onClick={onClose} className="rounded-pill" disabled={saving}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} className="rounded-pill" disabled={saving || !hasTitle}>
+          <Button onClick={handleSave} className="rounded-pill" disabled={saving}>
             {saving ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />

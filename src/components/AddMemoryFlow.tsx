@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowLeft, Camera, Type, Link as LinkIcon, MapPin, Tag, Calendar, ExternalLink, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TimelineSelector from "./TimelineSelector";
@@ -13,14 +13,9 @@ type Step = "selectTimeline" | "selectType" | "createContent";
 
 interface MemoryData {
   type: MemoryType;
-  content: string;
   files: File[];
-  date: string;
-  location: string;
   tags: string[];
   privacy: "inherit" | "private" | "restricted";
-  embedUrl?: string;
-  embedTitle?: string;
   embedDescription?: string;
 }
 
@@ -29,16 +24,20 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
   const [selectedTimeline, setSelectedTimeline] = useState<Timeline | null>(null);
   const [memoryData, setMemoryData] = useState<MemoryData>({
     type: "photo",
-    content: "",
     files: [],
-    date: new Date().toISOString().split('T')[0],
-    location: "",
     tags: [],
     privacy: "inherit",
-    embedUrl: "",
-    embedTitle: "",
     embedDescription: "",
   });
+
+  // Uncontrolled inputs to keep typing fast and focus stable.
+  const contentRef = useRef<HTMLTextAreaElement | HTMLInputElement | null>(null);
+  const embedUrlRef = useRef<HTMLInputElement>(null);
+  const embedTitleRef = useRef<HTMLInputElement>(null);
+  const embedCaptionRef = useRef<HTMLTextAreaElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
+  const locationRef = useRef<HTMLInputElement>(null);
+  const [embedUrlPreview, setEmbedUrlPreview] = useState("");
 
   const memoryTypes = [
     {
@@ -214,9 +213,9 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
               Sua memória
             </label>
             <textarea
+              ref={contentRef as React.RefObject<HTMLTextAreaElement>}
               placeholder="Conte sobre este momento..."
-              value={memoryData.content}
-              onChange={(e) => setMemoryData({ ...memoryData, content: e.target.value })}
+              defaultValue=""
               rows={4}
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground placeholder:text-muted-foreground resize-none
@@ -232,10 +231,11 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
                 Cole um link
               </label>
               <input
+                ref={embedUrlRef}
                 type="url"
                 placeholder="https://youtube.com/watch?v=... ou https://instagram.com/p/..."
-                value={memoryData.embedUrl}
-                onChange={(e) => setMemoryData({ ...memoryData, embedUrl: e.target.value })}
+                defaultValue=""
+                onBlur={(e) => setEmbedUrlPreview(e.target.value)}
                 className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                          text-foreground placeholder:text-muted-foreground
                          focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
@@ -246,14 +246,14 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
             </div>
 
             {/* Live Preview */}
-            {memoryData.embedUrl && (
+            {embedUrlPreview && (
               <div className="p-4 bg-muted/30 rounded-2xl border border-dashed border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  {detectEmbedProvider(memoryData.embedUrl) === 'youtube' && <Play size={16} className="text-red-500" />}
-                  {detectEmbedProvider(memoryData.embedUrl) === 'instagram' && <div className="w-4 h-4 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-sm" />}
-                  {detectEmbedProvider(memoryData.embedUrl) === 'spotify' && <Play size={16} className="text-green-500" />}
+                  {detectEmbedProvider(embedUrlPreview) === 'youtube' && <Play size={16} className="text-red-500" />}
+                  {detectEmbedProvider(embedUrlPreview) === 'instagram' && <div className="w-4 h-4 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-sm" />}
+                  {detectEmbedProvider(embedUrlPreview) === 'spotify' && <Play size={16} className="text-green-500" />}
                   <span className="text-sm text-muted-foreground capitalize">
-                    {detectEmbedProvider(memoryData.embedUrl)} detectado
+                    {detectEmbedProvider(embedUrlPreview)} detectado
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -267,10 +267,10 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
                 Título personalizado (opcional)
               </label>
               <input
+                ref={embedTitleRef}
                 type="text"
                 placeholder="Adicione um título personalizado..."
-                value={memoryData.embedTitle}
-                onChange={(e) => setMemoryData({ ...memoryData, embedTitle: e.target.value })}
+                defaultValue=""
                 className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                          text-foreground placeholder:text-muted-foreground
                          focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
@@ -285,10 +285,10 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
               Link ou URL
             </label>
             <input
+              ref={contentRef as React.RefObject<HTMLInputElement>}
               type="url"
               placeholder="https://exemplo.com"
-              value={memoryData.content}
-              onChange={(e) => setMemoryData({ ...memoryData, content: e.target.value })}
+              defaultValue=""
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground placeholder:text-muted-foreground
                        focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
@@ -303,9 +303,9 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
               Legenda (opcional)
             </label>
             <textarea
+              ref={embedCaptionRef}
               placeholder="Adicione uma legenda ao seu embed..."
-              value={memoryData.content}
-              onChange={(e) => setMemoryData({ ...memoryData, content: e.target.value })}
+              defaultValue=""
               rows={2}
               className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                        text-foreground placeholder:text-muted-foreground resize-none
@@ -321,9 +321,9 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
             Data
           </label>
           <input
+            ref={dateRef}
             type="date"
-            value={memoryData.date}
-            onChange={(e) => setMemoryData({ ...memoryData, date: e.target.value })}
+            defaultValue={new Date().toISOString().split('T')[0]}
             className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                      text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
           />
@@ -336,10 +336,10 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
             Localização (opcional)
           </label>
           <input
+            ref={locationRef}
             type="text"
             placeholder="Onde foi isso?"
-            value={memoryData.location}
-            onChange={(e) => setMemoryData({ ...memoryData, location: e.target.value })}
+            defaultValue=""
             className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                      text-foreground placeholder:text-muted-foreground
                      focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
@@ -387,11 +387,6 @@ const AddMemoryFlow = ({ onBack }: AddMemoryFlowProps) => {
         {/* Add Memory Button */}
         <Button 
           className="w-full py-3 rounded-2xl font-medium"
-          disabled={
-            (memoryData.type === "text" && !memoryData.content.trim()) ||
-            (memoryData.type === "link" && !memoryData.content.trim()) ||
-            (memoryData.type === "embed" && !memoryData.embedUrl.trim())
-          }
         >
           Adicionar memória
         </Button>
