@@ -1,41 +1,37 @@
-import { Users as UsersIcon } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
-import EmptyState from "@/components/EmptyState";
 import AppHeader from "@/components/AppHeader";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import TimelineCard from "@/components/TimelineCard";
+import { useSharedTimelines } from "@/lib/api/timelines";
+import { timelineFromRow } from "@/lib/api/adapters";
 
 const Relationships = () => {
-  const { user } = useAuth();
-
-  const { data: connections = [], isLoading } = useQuery({
-    queryKey: ["connections", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("connections")
-        .select("id, user1_id, user2_id, created_at")
-        .or(`user1_id.eq.${user!.id},user2_id.eq.${user!.id}`);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
+  const navigate = useNavigate();
+  const { data: sharedRows = [], isLoading } = useSharedTimelines();
+  const shared = useMemo(() => sharedRows.map(timelineFromRow), [sharedRows]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <AppHeader />
 
       <div className="max-w-md mx-auto px-4 py-6">
-        {!isLoading && connections.length === 0 && (
-          <EmptyState
-            icon={UsersIcon}
-            title="Nenhum relacionamento ainda"
-            description="Conecte-se com pessoas para ver seus relacionamentos aqui."
-            actionLabel="Adicionar pessoa"
-            onAction={() => toast({ title: "Em breve", description: "Convites estarão disponíveis em breve." })}
-          />
+        {!isLoading && shared.length === 0 ? (
+          <div className="text-center py-16 px-6">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+              Nenhuma timeline compartilhada ainda. Peça para alguém te convidar.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {shared.map((t) => (
+              <TimelineCard
+                key={t.id}
+                {...t}
+                onClick={() => navigate(`/timeline/${t.id}`)}
+              />
+            ))}
+          </div>
         )}
       </div>
 
