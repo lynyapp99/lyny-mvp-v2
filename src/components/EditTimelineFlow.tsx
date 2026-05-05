@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Upload, Lock, Users, Star, Archive, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TimelineSelector from "./TimelineSelector";
@@ -14,8 +14,6 @@ interface EditTimelineFlowProps {
 type Step = "selectTimeline" | "editDetails" | "selectRelationship";
 
 interface TimelineEditData {
-  title: string;
-  subtitle: string;
   cover: string;
   relationshipId: string;
   privacy: "private" | "shared" | "public";
@@ -26,13 +24,13 @@ const EditTimelineFlow = ({ onBack }: EditTimelineFlowProps) => {
   const [step, setStep] = useState<Step>("selectTimeline");
   const [selectedTimeline, setSelectedTimeline] = useState<Timeline | null>(null);
   const [editData, setEditData] = useState<TimelineEditData>({
-    title: "",
-    subtitle: "",
     cover: "",
     relationshipId: "",
     privacy: "private",
     favorite: false,
   });
+  const titleRef = useRef<HTMLInputElement>(null);
+  const subtitleRef = useRef<HTMLTextAreaElement>(null);
   const [showRelationshipSelector, setShowRelationshipSelector] = useState(false);
 
   const colors = [
@@ -59,8 +57,6 @@ const EditTimelineFlow = ({ onBack }: EditTimelineFlowProps) => {
     );
     
     setEditData({
-      title: timeline.title,
-      subtitle: timeline.subtitle,
       cover: timeline.cover,
       relationshipId: relationship?.id || "",
       privacy: timeline.privacy,
@@ -68,6 +64,12 @@ const EditTimelineFlow = ({ onBack }: EditTimelineFlowProps) => {
     });
     setStep("editDetails");
   };
+
+  useEffect(() => {
+    if (step !== "editDetails" || !selectedTimeline) return;
+    if (titleRef.current) titleRef.current.value = selectedTimeline.title ?? "";
+    if (subtitleRef.current) subtitleRef.current.value = selectedTimeline.subtitle ?? "";
+  }, [step, selectedTimeline]);
 
   const handleRelationshipSelect = (relationshipId: string) => {
     setEditData({ ...editData, relationshipId });
@@ -180,8 +182,8 @@ const EditTimelineFlow = ({ onBack }: EditTimelineFlowProps) => {
           </label>
           <input
             type="text"
-            value={editData.title}
-            onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+            ref={titleRef}
+            defaultValue={selectedTimeline?.title ?? ""}
             className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                      text-foreground placeholder:text-muted-foreground
                      focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card"
@@ -194,8 +196,8 @@ const EditTimelineFlow = ({ onBack }: EditTimelineFlowProps) => {
             Description
           </label>
           <textarea
-            value={editData.subtitle}
-            onChange={(e) => setEditData({ ...editData, subtitle: e.target.value })}
+            ref={subtitleRef}
+            defaultValue={selectedTimeline?.subtitle ?? ""}
             rows={3}
             className="w-full px-4 py-3 bg-muted/50 rounded-2xl border-0 
                      text-foreground placeholder:text-muted-foreground resize-none
