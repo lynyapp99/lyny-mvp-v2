@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
-  ArrowLeft, 
   Calendar, 
   MapPin, 
   Users, 
@@ -12,12 +11,12 @@ import {
   Check,
   Clock,
   Download,
-  Settings,
   ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
+import ContextHeader from "@/components/ContextHeader";
 
 const EventDetail = () => {
   const { eventId } = useParams();
@@ -78,34 +77,7 @@ const EventDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-card/95 backdrop-blur-xl border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(-1)}
-                className="rounded-xl"
-              >
-                <ArrowLeft size={20} />
-              </Button>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">Detalhes</h1>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(`/event/${eventId}/settings`)}
-              className="rounded-xl"
-            >
-              <Settings size={20} />
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ContextHeader title={event.title} onShare={handleShare} />
 
       {/* Event Cover */}
       <div className="relative h-56 overflow-hidden">
