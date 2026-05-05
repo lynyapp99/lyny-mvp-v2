@@ -291,10 +291,7 @@ const EditTimelineFlow = ({ onBack }: EditTimelineFlowProps) => {
         </div>
 
         {/* Save Button */}
-        <Button 
-          className="w-full py-3 rounded-2xl font-medium"
-          disabled={!editData.title.trim()}
-        >
+        <Button className="w-full py-3 rounded-2xl font-medium">
           Save Changes
         </Button>
 
