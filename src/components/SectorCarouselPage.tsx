@@ -43,12 +43,12 @@ const SectorCarouselPage = ({
   onRemoveSector,
 }: SectorCarouselPageProps) => {
   const colorClasses = {
-    pink: "bg-gradient-to-br from-timeline-pink/40 to-timeline-pink/20",
-    blue: "bg-gradient-to-br from-timeline-blue/40 to-timeline-blue/20",
-    green: "bg-gradient-to-br from-timeline-green/40 to-timeline-green/20",
-    yellow: "bg-gradient-to-br from-timeline-yellow/40 to-timeline-yellow/20",
-    purple: "bg-gradient-to-br from-timeline-purple/40 to-timeline-purple/20",
-    orange: "bg-gradient-to-br from-timeline-orange/40 to-timeline-orange/20",
+    pink: "bg-gradient-to-b from-timeline-pink/25 via-timeline-pink/10 to-background/60",
+    blue: "bg-gradient-to-b from-timeline-blue/25 via-timeline-blue/10 to-background/60",
+    green: "bg-gradient-to-b from-timeline-green/25 via-timeline-green/10 to-background/60",
+    yellow: "bg-gradient-to-b from-timeline-yellow/25 via-timeline-yellow/10 to-background/60",
+    purple: "bg-gradient-to-b from-timeline-purple/25 via-timeline-purple/10 to-background/60",
+    orange: "bg-gradient-to-b from-timeline-orange/25 via-timeline-orange/10 to-background/60",
   };
 
   const emphasisClass = isActive
@@ -75,28 +75,12 @@ const SectorCarouselPage = ({
         className
       )}
     >
-      {/* Remove sector button in edit mode */}
-      {isEditMode && onRemoveSector && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if ("vibrate" in navigator) navigator.vibrate(20);
-            onRemoveSector(sector.id);
-          }}
-          className="absolute -top-2 -right-2 z-50 w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-destructive text-destructive-foreground shadow-lg flex items-center justify-center hover:scale-110 active:scale-100 transition-all duration-150 touch-manipulation"
-          aria-label={`Remover setor ${sector.name}`}
-          style={{ padding: '12px' }}
-        >
-          <span className="text-xl leading-none">×</span>
-        </button>
-      )}
-      
       <div className={cn(
-        "w-full rounded-app-xl p-3 pb-8 transition-all duration-300 relative flex flex-col",
+        "w-full rounded-[28px] p-4 pb-20 transition-all duration-300 relative flex flex-col border border-white/5 backdrop-blur-sm",
         colorClasses[sector.color],
-        isActive 
-          ? "shadow-2xl ring-2 ring-primary/20" 
-          : "shadow-md",
+        isActive
+          ? "shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]"
+          : "shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]",
         isCompactSector 
           ? "h-auto min-h-[220px] max-h-[72vh] mb-4" 
           : "h-full"
@@ -106,39 +90,57 @@ const SectorCarouselPage = ({
         maxHeight: 'clamp(400px, 58vh, 600px)',
       } : undefined}
       >
-        {/* Position Indicator - moved outside for proper stacking */}
-        {isActive && totalSectors > 0 && (
-          <div className="absolute top-2 right-2 z-20 px-3 py-1.5 bg-foreground/90 backdrop-blur-sm rounded-full shadow-lg">
-            <span className="text-xs text-background font-semibold tracking-wide">
+        {/* Remove sector button in edit mode — kept inside card bounds */}
+        {isEditMode && onRemoveSector && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if ("vibrate" in navigator) navigator.vibrate(20);
+              onRemoveSector(sector.id);
+            }}
+            className="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-foreground/85 text-background shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 touch-manipulation"
+            aria-label={`Remover setor ${sector.name}`}
+          >
+            <span className="text-base leading-none font-medium">×</span>
+          </button>
+        )}
+
+        {/* Position Indicator — compact pill */}
+        {!isEditMode && isActive && totalSectors > 0 && (
+          <div className="absolute top-3 right-3 z-20 px-2 py-0.5 bg-foreground/10 border border-white/10 backdrop-blur-md rounded-full">
+            <span className="text-[10px] text-foreground/70 font-medium tracking-wide tabular-nums">
               {currentIndex + 1}/{totalSectors}
             </span>
           </div>
         )}
 
-        {/* Sector Header - Compacto */}
-        <div className="mb-2 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
+        {/* Sector Header */}
+        <header className="mb-3 flex-shrink-0 pr-14">
+          <div className="flex items-center gap-3">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[hsl(var(--accent)/0.15)] border border-[hsl(var(--accent))]"
+              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[hsl(var(--accent)/0.12)] border border-[hsl(var(--accent)/0.35)]"
               aria-hidden="true"
             >
               <span
                 className="font-dmsans font-semibold leading-none text-[hsl(var(--accent))]"
-                style={{ fontSize: "18px" }}
+                style={{ fontSize: "16px" }}
               >
                 {(sector.name?.trim()?.charAt(0) || "?").toUpperCase()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-foreground tracking-tight truncate leading-tight">
-                {sector.name} · {timelines.length} {timelines.length === 1 ? 'timeline' : 'timelines'}
+              <h2 className="text-[17px] font-semibold text-foreground tracking-tight truncate leading-tight">
+                {sector.name}
               </h2>
+              <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full bg-foreground/5 border border-white/5 text-[11px] text-foreground/60 font-medium">
+                {timelines.length} {timelines.length === 1 ? "timeline" : "timelines"}
+              </span>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Timelines List - Ocupa altura útil */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide scroll-smooth overscroll-none space-y-2 pb-3">
+        <div className="flex-1 overflow-y-auto scrollbar-hide scroll-smooth overscroll-none space-y-2 pb-2">
           {timelines.length > 0 ? (
             <>
               {timelines.map((timeline) => (
@@ -157,11 +159,10 @@ const SectorCarouselPage = ({
                         if ("vibrate" in navigator) navigator.vibrate(20);
                         onRemoveTimeline(timeline.id);
                       }}
-                      className="absolute -top-2 -right-2 z-50 w-9 h-9 min-w-[44px] min-h-[44px] rounded-full bg-destructive text-destructive-foreground shadow-lg flex items-center justify-center hover:scale-110 active:scale-100 transition-all duration-150 touch-manipulation"
+                      className="absolute top-1.5 right-1.5 z-40 w-7 h-7 rounded-full bg-foreground/85 text-background shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 touch-manipulation"
                       aria-label={`Remover timeline ${timeline.title}`}
-                      style={{ padding: '12px' }}
                     >
-                      <span className="text-lg leading-none">×</span>
+                      <span className="text-sm leading-none font-medium">×</span>
                     </button>
                   )}
                   <button
@@ -171,12 +172,12 @@ const SectorCarouselPage = ({
                     }}
                     disabled={isEditMode}
                     aria-label={`Abrir timeline ${timeline.title}`}
-                    className="w-full text-left rounded-app bg-white/95 backdrop-blur-sm shadow-sm p-2 transition-all duration-150 hover:shadow-lg hover:-translate-y-0.5 hover:bg-white active:scale-[0.97] group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-100"
+                    className="w-full text-left rounded-[20px] bg-foreground/[0.04] hover:bg-foreground/[0.07] border border-white/5 backdrop-blur-sm p-2.5 transition-all duration-150 hover:-translate-y-0.5 active:scale-[0.98] group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-0 disabled:opacity-100 min-h-[72px]"
                   >
-                  <div className="flex items-start gap-2">
-                    {/* Thumbnail - Compacto */}
+                  <div className="flex items-center gap-3">
+                    {/* Thumbnail */}
                     <div className="relative flex-shrink-0">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted/30 ring-1 ring-black/5">
+                      <div className="w-14 h-14 rounded-2xl overflow-hidden bg-muted/30 ring-1 ring-white/10">
                         {timeline.cover ? (
                           <img 
                             src={timeline.cover} 
@@ -186,30 +187,32 @@ const SectorCarouselPage = ({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground" aria-hidden="true">
+                          <div className="w-full h-full flex items-center justify-center text-foreground/50" aria-hidden="true">
                             {(() => {
                               const Icon = getSectorIcon(sector.emoji);
-                              return <Icon className="w-5 h-5" strokeWidth={1.75} />;
+                              return <Icon className="w-6 h-6" strokeWidth={1.5} />;
                             })()}
                           </div>
                         )}
                       </div>
                       {timeline.isHidden && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-pill bg-muted/80 flex items-center justify-center shadow-sm">
-                          <Lock className="h-2.5 w-2.5 text-muted-foreground" />
+                        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-background border border-white/10 flex items-center justify-center shadow-sm">
+                          <Lock className="h-2.5 w-2.5 text-foreground/70" />
                         </div>
                       )}
                     </div>
 
-                    {/* Content - Densidade alta */}
+                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[14px] font-semibold text-[hsl(var(--accent))] mb-0.5 line-clamp-1 group-hover:brightness-110 transition-all">
+                      <h3 className="text-[15px] font-semibold text-foreground mb-0.5 line-clamp-1 tracking-tight">
                         {timeline.title}
                       </h3>
-                      <p className="text-[11px] text-black line-clamp-1 mb-0.5">
-                        {timeline.subtitle}
-                      </p>
-                      <div className="flex items-center gap-1.5 text-[10px] text-foreground/60">
+                      {timeline.subtitle && (
+                        <p className="text-[12px] text-foreground/55 line-clamp-1 mb-1">
+                          {timeline.subtitle}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1.5 text-[10.5px] text-foreground/45 font-medium">
                         <span>{timeline.items} memórias</span>
                         <span aria-hidden="true">·</span>
                         <time dateTime={timeline.updatedAt}>
@@ -223,34 +226,35 @@ const SectorCarouselPage = ({
               ))}
             </>
           ) : (
-            <div className="text-center py-8 px-4" role="status">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted/20 flex items-center justify-center text-muted-foreground/60">
+            <div className="text-center py-10 px-4" role="status">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-foreground/5 border border-white/5 flex items-center justify-center text-foreground/40">
                 {(() => {
                   const Icon = getSectorIcon(sector.emoji);
-                  return <Icon className="w-7 h-7" strokeWidth={1.5} aria-hidden="true" />;
+                  return <Icon className="w-6 h-6" strokeWidth={1.5} aria-hidden="true" />;
                 })()}
               </div>
-              <p className="text-sm font-medium text-foreground/80 mb-1">
+              <p className="text-[13px] font-medium text-foreground/75 mb-1">
                 Este setor ainda não tem timelines
               </p>
-              <p className="text-xs text-foreground/60">
-                Toque no botão abaixo para criar a primeira
+              <p className="text-[11px] text-foreground/50">
+                Toque em "Nova timeline" abaixo
               </p>
             </div>
           )}
         </div>
 
-        {/* Floating Add Button - Fixo dentro do setor */}
-        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20" style={{ bottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+        {/* Add timeline — refined pill */}
+        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-20" style={{ bottom: 'max(12px, env(safe-area-inset-bottom))' }}>
           <button
             onClick={() => {
               if ("vibrate" in navigator) navigator.vibrate(10);
               onAddTimeline();
             }}
             aria-label="Criar nova timeline"
-            className="pointer-events-auto min-w-[48px] min-h-[48px] w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 flex items-center justify-center group touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="pointer-events-auto min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-foreground/[0.06] hover:bg-foreground/[0.1] border border-white/10 text-foreground text-[13px] font-medium backdrop-blur-md shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)] active:scale-[0.97] transition-all duration-150 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-            <Plus className="h-6 w-6 group-hover:scale-110 transition-transform" aria-hidden="true" />
+            <Plus className="h-4 w-4" strokeWidth={2.25} aria-hidden="true" />
+            <span>Nova timeline</span>
           </button>
         </div>
       </div>
