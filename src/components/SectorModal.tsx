@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,16 @@ const SectorModal = ({ isOpen, onClose, onSave, editingSector }: SectorModalProp
   const [name, setName] = useState(editingSector?.name || "");
   const [selectedColor, setSelectedColor] = useState<Sector["color"]>(editingSector?.color || "pink");
   const [selectedIcon, setSelectedIcon] = useState(editingSector?.emoji || "folder");
+
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) {
+      setName(editingSector?.name || "");
+      setSelectedColor(editingSector?.color || "pink");
+      setSelectedIcon(editingSector?.emoji || "folder");
+    }
+    wasOpenRef.current = isOpen;
+  }, [isOpen, editingSector]);
 
   const handleSave = () => {
     if (!name.trim()) {

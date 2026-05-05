@@ -118,10 +118,17 @@ const SectorCarouselPage = ({
         {/* Sector Header - Compacto */}
         <div className="mb-2 flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            {(() => {
-              const SectorIcon = getSectorIcon(sector.emoji);
-              return <SectorIcon className="w-7 h-7 text-foreground" strokeWidth={1.75} aria-hidden="true" />;
-            })()}
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[hsl(var(--accent)/0.15)] border border-[hsl(var(--accent))]"
+              aria-hidden="true"
+            >
+              <span
+                className="font-dmsans font-semibold leading-none text-[hsl(var(--accent))]"
+                style={{ fontSize: "18px" }}
+              >
+                {(sector.name?.trim()?.charAt(0) || "?").toUpperCase()}
+              </span>
+            </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-foreground tracking-tight truncate leading-tight">
                 {sector.name} · {timelines.length} {timelines.length === 1 ? 'timeline' : 'timelines'}

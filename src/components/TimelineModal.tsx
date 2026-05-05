@@ -56,8 +56,9 @@ const TimelineModal = ({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const wasOpenRef = useRef(false);
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
       setTitle("");
       setSubtitle("");
       setSectorChoice(defaultSectorId ?? NO_SECTOR);
@@ -65,6 +66,7 @@ const TimelineModal = ({
       setCoverPreview(null);
       setCoverFile(null);
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen, defaultSectorId]);
 
   const handlePickCover = (file: File) => {

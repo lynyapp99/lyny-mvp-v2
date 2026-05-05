@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +11,14 @@ interface Props {
 const NoteComposer = ({ open, onOpenChange, onSave }: Props) => {
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (open && !wasOpenRef.current) {
+      setText("");
+    }
+    wasOpenRef.current = open;
+  }, [open]);
 
   const handleSave = async () => {
     const v = text.trim();
