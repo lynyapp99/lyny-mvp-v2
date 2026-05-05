@@ -143,12 +143,12 @@ const InviteAccept = () => {
       </p>
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <Button asChild className="rounded-pill">
-          <Link to={`/auth?mode=signup&returnTo=${encodeURIComponent(returnTo)}`}>
+          <Link to={`/auth?mode=signup&redirect=${encodeURIComponent(returnTo)}`}>
             Criar conta
           </Link>
         </Button>
         <Button asChild variant="outline" className="rounded-pill">
-          <Link to={`/auth?returnTo=${encodeURIComponent(returnTo)}`}>
+          <Link to={`/auth?redirect=${encodeURIComponent(returnTo)}`}>
             Já tenho conta
           </Link>
         </Button>
