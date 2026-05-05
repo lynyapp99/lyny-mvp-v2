@@ -57,7 +57,20 @@ const Auth = () => {
 
   // Redirect on session, except when showing success screen
   useEffect(() => {
-    if (session && !successName) navigate(from, { replace: true });
+    if (session && !successName) {
+      (async () => {
+        const { data } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (data?.onboarding_completed) {
+          navigate(from, { replace: true });
+        } else {
+          navigate("/onboarding", { replace: true });
+        }
+      })();
+    }
   }, [session, from, navigate, successName]);
 
   // After success screen, navigate to onboarding
