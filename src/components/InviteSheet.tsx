@@ -46,15 +46,8 @@ const InviteSheet = ({ open, onOpenChange, timelineId, timelineTitle, existingTo
   }, [open, token, loading, timelineId, onTokenGenerated, toast, onOpenChange]);
 
   const haptic = () => "vibrate" in navigator && navigator.vibrate(10);
-  const publicOrigin = (() => {
-    if (typeof window === "undefined") return "";
-    const origin = window.location.origin;
-    if (origin.includes("lovable.app") && !origin.includes("dear-moments-together.lovable.app")) {
-      return "https://dear-moments-together.lovable.app";
-    }
-    return origin;
-  })();
-  const link = token ? `${publicOrigin}/invite/${token}` : "";
+  const APP_URL = "https://dear-moments-together.lovable.app";
+  const link = token ? `${APP_URL}/invite/${token}` : "";
 
   const handleCopy = async () => {
     haptic();
