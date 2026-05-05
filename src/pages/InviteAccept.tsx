@@ -26,6 +26,7 @@ const InviteAccept = () => {
 
   // Fetch invite
   useEffect(() => {
+    console.log("Token:", token);
     if (!token) {
       setError("Convite inválido");
       setLoading(false);
@@ -33,29 +34,28 @@ const InviteAccept = () => {
     }
     const load = async () => {
       try {
-        const { data: tl, error: tlErr } = await supabase
-          .from("timelines")
-          .select("id, title, user_id")
-          .eq("invite_token", token)
-          .maybeSingle();
-        if (tlErr) throw tlErr;
+        const { data, error: tlErr } = await supabase.rpc("get_invite_info", {
+          _token: token,
+        });
+        console.log("Timeline:", { data, error: tlErr });
+        if (tlErr) {
+          console.error("Erro:", tlErr);
+          throw tlErr;
+        }
+        const tl = Array.isArray(data) ? data[0] : data;
         if (!tl) {
-          setError("Convite inválido");
+          setError("Nenhuma timeline encontrada para este token.");
           return;
         }
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("display_name, username")
-          .eq("id", tl.user_id)
-          .maybeSingle();
         setInvite({
-          timelineId: tl.id,
-          timelineTitle: tl.title,
-          ownerId: tl.user_id,
-          ownerName: prof?.display_name || prof?.username || "Alguém",
+          timelineId: tl.timeline_id,
+          timelineTitle: tl.timeline_title,
+          ownerId: tl.owner_id,
+          ownerName: tl.owner_name || "Alguém",
         });
       } catch (e: any) {
-        setError(e.message || "Convite inválido");
+        console.error("Erro:", e);
+        setError(e.message || "Erro desconhecido ao buscar convite");
       } finally {
         setLoading(false);
       }

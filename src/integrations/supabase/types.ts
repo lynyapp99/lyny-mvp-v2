@@ -355,6 +355,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_invite_info: {
+        Args: { _token: string }
+        Returns: {
+          cover_url: string
+          owner_id: string
+          owner_name: string
+          timeline_id: string
+          timeline_subtitle: string
+          timeline_title: string
+        }[]
+      }
       is_timeline_member: {
         Args: { _timeline_id: string; _user_id: string }
         Returns: boolean
