@@ -14,6 +14,7 @@ import AddContentSheet from "@/components/AddContentSheet";
 import NoteComposer from "@/components/NoteComposer";
 import MediaViewer from "@/components/MediaViewer";
 import ShareSheet from "@/components/ShareSheet";
+import InviteSheet from "@/components/InviteSheet";
 import ContextHeader from "@/components/ContextHeader";
 
 type Upload = { id: string; name: string; progress: number };
@@ -41,10 +42,15 @@ const TimelineDetail = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   const timeline = timelineRows.map(timelineFromRow).find((t) => t.id === timelineId);
+  const timelineRow = timelineRows.find((t) => t.id === timelineId);
+  const isOwner = !!timelineRow && !!user && timelineRow.user_id === user.id;
+  const currentToken = inviteToken ?? timelineRow?.invite_token ?? null;
 
   // Cronológico ascendente: mais antigo no topo
   const sortedFeed = useMemo(
@@ -103,6 +109,8 @@ const TimelineDetail = () => {
       <ContextHeader
         title={timeline.title}
         onShare={() => setShareOpen(true)}
+        showInvite={isOwner}
+        onInvite={() => setInviteOpen(true)}
       />
       {/* Cover header */}
       <div className="relative w-full h-64 overflow-hidden">
@@ -225,6 +233,20 @@ const TimelineDetail = () => {
         timelineId={timeline.id}
         timelineTitle={timeline.title}
       />
+
+      {isOwner && (
+        <InviteSheet
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          timelineId={timeline.id}
+          timelineTitle={timeline.title}
+          existingToken={currentToken}
+          onTokenGenerated={(t) => {
+            setInviteToken(t);
+            qc.invalidateQueries({ queryKey: ["timelines"] });
+          }}
+        />
+      )}
     </div>
   );
 };
