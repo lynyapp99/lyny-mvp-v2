@@ -1,10 +1,3 @@
-# Notifications — basic implementation
-
-## 1. Database (migration)
-
-Create `notifications` table + RLS + trigger to auto-notify timeline members on new memory.
-
-```sql
 CREATE TABLE public.notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -46,7 +39,6 @@ BEGIN
     FROM public.profiles WHERE id = NEW.user_id;
   SELECT title INTO v_title FROM public.timelines WHERE id = NEW.timeline_id;
 
-  -- Notify all members except the actor
   INSERT INTO public.notifications (user_id, type, message, timeline_id)
   SELECT tm.user_id, 'new_memory',
          v_actor || ' adicionou uma memória em ' || COALESCE(v_title, 'uma timeline'),
@@ -55,7 +47,6 @@ BEGIN
   WHERE tm.timeline_id = NEW.timeline_id
     AND tm.user_id <> NEW.user_id;
 
-  -- Also notify the timeline owner if not a member row and not the actor
   INSERT INTO public.notifications (user_id, type, message, timeline_id)
   SELECT t.user_id, 'new_memory',
          v_actor || ' adicionou uma memória em ' || COALESCE(v_title, 'uma timeline'),
@@ -77,32 +68,3 @@ CREATE TRIGGER on_memory_inserted
   FOR EACH ROW EXECUTE FUNCTION public.notify_timeline_members();
 
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
-```
-
-## 2. API hook
-
-Create `src/lib/api/notifications.ts`:
-- `useNotifications()` — list current user's notifications, ordered DESC.
-- `useUnreadCount()` — count of `read = false`.
-- `useMarkAllRead()` — sets `read = true` for current user's unread rows.
-- Subscribes to realtime `postgres_changes` on `notifications` filtered by `user_id` to invalidate queries.
-
-## 3. Home — bell with badge
-
-In `src/pages/Home.tsx` (next to the SearchBar / header area, mobile-first 44x44 target):
-- Add a bell icon button using `useUnreadCount()`.
-- If count > 0, render small red badge (#E0162B) showing count (cap at `9+`).
-- onClick → `navigate('/notifications')` + haptic vibrate(10).
-
-## 4. Notifications page
-
-Update `src/pages/Notifications.tsx`:
-- Replace empty state with list from `useNotifications()`.
-- Each row: message, relative time (date-fns is already used elsewhere if available; otherwise simple formatter), unread dot if `!read`.
-- On mount: call `markAllRead` mutation once.
-- Click row → if `timeline_id` present, navigate to `/timeline/{id}`.
-- Keep `EmptyState` when list is empty.
-
-## Notes
-- All actions are user-initiated (no autoplay/scroll), 44x44 touch targets, dark theme, accent #E0162B for badge — aligned with project rules.
-- Realtime invalidation keeps badge in sync without polling.
