@@ -18,6 +18,8 @@ import SectorModal from "@/components/SectorModal";
 import TimelineModal from "@/components/TimelineModal";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Smartphone } from "lucide-react";
+import { Bell } from "lucide-react";
+import { useUnreadNotificationsCount } from "@/lib/api/notifications";
 import { toast } from "@/hooks/use-toast";
 import EditModeButton from "@/components/EditModeButton";
 import TimelineShortcuts from "@/components/TimelineShortcuts";
@@ -39,6 +41,7 @@ const Home = () => {
   const createSector = useCreateSector();
   const deleteSector = useDeleteSector();
   const createTimelineMut = useCreateTimeline();
+  const { data: unreadCount = 0 } = useUnreadNotificationsCount();
 
   const { sectors: dbSectors, timelines: allTimelines } = useMemo(
     () => buildSectorsWithTimelines(sectorRows, timelineRows),
@@ -504,6 +507,21 @@ const Home = () => {
             />
           </div>
           <EditModeButton isEditMode={isEditMode} onClick={toggleEditMode} />
+          <button
+            onClick={() => {
+              if ("vibrate" in navigator) navigator.vibrate(10);
+              navigate("/notifications");
+            }}
+            className="relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-app text-foreground active:scale-95 transition-transform touch-manipulation"
+            aria-label={unreadCount > 0 ? `Notificações (${unreadCount} não lidas)` : "Notificações"}
+          >
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
