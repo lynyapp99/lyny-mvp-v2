@@ -1,108 +1,41 @@
-# Notifications — basic implementation
+# Participantes na Timeline Detail
 
-## 1. Database (migration)
+Adicionar uma seção de "Participantes" na tela `TimelineDetail`, mostrando avatares empilhados (dono + membros), com modal para lista completa.
 
-Create `notifications` table + RLS + trigger to auto-notify timeline members on new memory.
+## 1. Camada de dados
 
-```sql
-CREATE TABLE public.notifications (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  type text NOT NULL,
-  message text NOT NULL,
-  timeline_id uuid REFERENCES public.timelines(id) ON DELETE CASCADE,
-  read boolean NOT NULL DEFAULT false,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
+Criar hook `useTimelineMembers(timelineId)` em `src/lib/api/timelines.ts`:
 
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+- Busca em paralelo:
+  1. A timeline (para obter `user_id` do dono).
+  2. Os `timeline_members` daquela timeline.
+  3. Os `profiles` correspondentes (dono + membros) numa única query `in("id", [...])`.
+- Retorna lista unificada `{ userId, role: "owner" | "contributor" | "viewer", displayName, username, avatarUrl }`, com o dono sempre primeiro e sem duplicatas (caso o dono também esteja em `timeline_members`).
+- React Query key: `["timeline-members", timelineId]`.
 
-CREATE POLICY "Users see own notifications"
-  ON public.notifications FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
+Observação RLS: as policies já permitem ao dono ver todos os membros, e cada membro vê a si próprio. Para a lista completa funcionar para membros não-donos, vamos relaxar via consulta — se o usuário não é dono, ainda assim verá pelo menos a si mesmo + dono (via profiles). Para o escopo atual (avatares visuais), isso é suficiente; só o dono terá a lista 100% completa, o que se alinha com o requisito "Só o dono vê o role de cada participante".
 
-CREATE POLICY "Users update own notifications"
-  ON public.notifications FOR UPDATE TO authenticated
-  USING (auth.uid() = user_id);
+## 2. Componente `TimelineParticipants`
 
-CREATE POLICY "System can insert notifications"
-  ON public.notifications FOR INSERT TO authenticated
-  WITH CHECK (true);
+Novo arquivo `src/components/TimelineParticipants.tsx`:
 
-CREATE INDEX idx_notifications_user_unread
-  ON public.notifications (user_id, read, created_at DESC);
+- Props: `timelineId: string`, `isOwner: boolean`.
+- Usa `useTimelineMembers`.
+- Renderiza stack horizontal com até 5 avatares sobrepostos (`-ml-2`, `ring-2 ring-background`), usando `Avatar`/`AvatarImage`/`AvatarFallback` (iniciais do `displayName` ou `username`).
+- Se houver mais de 5, mostra um círculo extra `+N`.
+- Toda a área é clicável (touch target ≥44px) e abre um `Sheet` com a lista completa:
+  - Cada linha: avatar, nome (`@username` abaixo), e — apenas se `isOwner` — uma badge com role traduzido: `Dono`, `Contribuidor`, `Visualizador`.
+- Haptic `navigator.vibrate(10)` no toque (segue padrão do projeto).
 
-CREATE OR REPLACE FUNCTION public.notify_timeline_members()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_actor text;
-  v_title text;
-BEGIN
-  SELECT COALESCE(display_name, username, 'Alguém') INTO v_actor
-    FROM public.profiles WHERE id = NEW.user_id;
-  SELECT title INTO v_title FROM public.timelines WHERE id = NEW.timeline_id;
+## 3. Integração em `TimelineDetail.tsx`
 
-  -- Notify all members except the actor
-  INSERT INTO public.notifications (user_id, type, message, timeline_id)
-  SELECT tm.user_id, 'new_memory',
-         v_actor || ' adicionou uma memória em ' || COALESCE(v_title, 'uma timeline'),
-         NEW.timeline_id
-  FROM public.timeline_members tm
-  WHERE tm.timeline_id = NEW.timeline_id
-    AND tm.user_id <> NEW.user_id;
+- Importar `TimelineParticipants`.
+- Renderizar logo abaixo do bloco de capa (antes do `uploads`/feed), dentro de `max-w-md mx-auto px-4`, com um pequeno título "Participantes" em `text-xs uppercase text-muted-foreground` e o stack abaixo.
+- Passar `timelineId={timeline.id}` e `isOwner={isOwner}`.
 
-  -- Also notify the timeline owner if not a member row and not the actor
-  INSERT INTO public.notifications (user_id, type, message, timeline_id)
-  SELECT t.user_id, 'new_memory',
-         v_actor || ' adicionou uma memória em ' || COALESCE(v_title, 'uma timeline'),
-         NEW.timeline_id
-  FROM public.timelines t
-  WHERE t.id = NEW.timeline_id
-    AND t.user_id <> NEW.user_id
-    AND NOT EXISTS (
-      SELECT 1 FROM public.timeline_members tm
-      WHERE tm.timeline_id = t.id AND tm.user_id = t.user_id
-    );
+## Detalhes técnicos
 
-  RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER on_memory_inserted
-  AFTER INSERT ON public.memories
-  FOR EACH ROW EXECUTE FUNCTION public.notify_timeline_members();
-
-ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
-```
-
-## 2. API hook
-
-Create `src/lib/api/notifications.ts`:
-- `useNotifications()` — list current user's notifications, ordered DESC.
-- `useUnreadCount()` — count of `read = false`.
-- `useMarkAllRead()` — sets `read = true` for current user's unread rows.
-- Subscribes to realtime `postgres_changes` on `notifications` filtered by `user_id` to invalidate queries.
-
-## 3. Home — bell with badge
-
-In `src/pages/Home.tsx` (next to the SearchBar / header area, mobile-first 44x44 target):
-- Add a bell icon button using `useUnreadCount()`.
-- If count > 0, render small red badge (#E0162B) showing count (cap at `9+`).
-- onClick → `navigate('/notifications')` + haptic vibrate(10).
-
-## 4. Notifications page
-
-Update `src/pages/Notifications.tsx`:
-- Replace empty state with list from `useNotifications()`.
-- Each row: message, relative time (date-fns is already used elsewhere if available; otherwise simple formatter), unread dot if `!read`.
-- On mount: call `markAllRead` mutation once.
-- Click row → if `timeline_id` present, navigate to `/timeline/{id}`.
-- Keep `EmptyState` when list is empty.
-
-## Notes
-- All actions are user-initiated (no autoplay/scroll), 44x44 touch targets, dark theme, accent #E0162B for badge — aligned with project rules.
-- Realtime invalidation keeps badge in sync without polling.
+- Iniciais: pegar primeira letra de cada palavra do `displayName` (até 2), fallback para `username[0]`.
+- Sem alterações de schema, sem migrations.
+- Sem autoplay/scroll programático (respeita regra do projeto).
+- Tema escuro: `ring-background` nos avatares para criar separação visual no stack.
