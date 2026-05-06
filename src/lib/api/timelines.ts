@@ -121,3 +121,66 @@ export const useSharedTimelines = () => {
     },
   });
 };
+export type TimelineMember = {
+  userId: string;
+  role: "owner" | "contributor" | "viewer";
+  displayName: string | null;
+  username: string | null;
+  avatarUrl: string | null;
+};
+
+export const useTimelineMembers = (timelineId: string | undefined) => {
+  return useQuery({
+    queryKey: ["timeline-members", timelineId],
+    enabled: !!timelineId,
+    queryFn: async (): Promise<TimelineMember[]> => {
+      if (!timelineId) return [];
+      const [{ data: timeline, error: tErr }, { data: members, error: mErr }] = await Promise.all([
+        supabase.from("timelines").select("user_id").eq("id", timelineId).maybeSingle(),
+        supabase.from("timeline_members").select("user_id, role").eq("timeline_id", timelineId),
+      ]);
+      if (tErr) throw tErr;
+      if (mErr) throw mErr;
+
+      const ownerId = timeline?.user_id;
+      const ids = new Set<string>();
+      if (ownerId) ids.add(ownerId);
+      (members ?? []).forEach((m) => ids.add(m.user_id));
+      if (ids.size === 0) return [];
+
+      const { data: profiles, error: pErr } = await supabase
+        .from("profiles")
+        .select("id, display_name, username, avatar_url")
+        .in("id", Array.from(ids));
+      if (pErr) throw pErr;
+
+      const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
+      const result: TimelineMember[] = [];
+      if (ownerId) {
+        const p = profileMap.get(ownerId);
+        result.push({
+          userId: ownerId,
+          role: "owner",
+          displayName: p?.display_name ?? null,
+          username: p?.username ?? null,
+          avatarUrl: p?.avatar_url ?? null,
+        });
+      }
+      (members ?? []).forEach((m) => {
+        if (m.user_id === ownerId) return;
+        const p = profileMap.get(m.user_id);
+        const role = (m.role === "contributor" || m.role === "viewer" || m.role === "owner")
+          ? (m.role as TimelineMember["role"])
+          : "viewer";
+        result.push({
+          userId: m.user_id,
+          role,
+          displayName: p?.display_name ?? null,
+          username: p?.username ?? null,
+          avatarUrl: p?.avatar_url ?? null,
+        });
+      });
+      return result;
+    },
+  });
+};

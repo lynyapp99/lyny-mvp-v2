@@ -34,6 +34,7 @@ import NoteComposer from "@/components/NoteComposer";
 import MediaViewer from "@/components/MediaViewer";
 import InviteSheet from "@/components/InviteSheet";
 import ContextHeader from "@/components/ContextHeader";
+import TimelineParticipants from "@/components/TimelineParticipants";
 
 type Upload = { id: string; name: string; progress: number };
 
@@ -249,6 +250,7 @@ const TimelineDetail = () => {
 
       {/* Body */}
       <div className="max-w-md mx-auto px-4 pt-6">
+        <TimelineParticipants timelineId={timeline.id} isOwner={isOwner} />
         {uploads.length > 0 && (
           <div className="space-y-3 mb-5">
             {uploads.map((u) => (
