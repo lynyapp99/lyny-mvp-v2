@@ -1,41 +1,48 @@
-# Participantes na Timeline Detail
+# Substituir wordmark "lyny" pelo SVG customizado
 
-Adicionar uma seção de "Participantes" na tela `TimelineDetail`, mostrando avatares empilhados (dono + membros), com modal para lista completa.
+## Pré-requisito
+Preciso que o arquivo `lyn-2.svg` seja reanexado — atualmente o sandbox não consegue acessá-lo (apenas 3 dos 24 paths aparecem no preview).
 
-## 1. Camada de dados
+## Passos
 
-Criar hook `useTimelineMembers(timelineId)` em `src/lib/api/timelines.ts`:
+1. **Copiar o SVG para o projeto**
+   - `code--copy user-uploads://lyn-2.svg src/assets/lyny-logo.svg`
+   - Também salvar uma versão PNG/SVG em `public/lyny-logo.svg` para uso em `<img>` direto (Auth, manifest).
 
-- Busca em paralelo:
-  1. A timeline (para obter `user_id` do dono).
-  2. Os `timeline_members` daquela timeline.
-  3. Os `profiles` correspondentes (dono + membros) numa única query `in("id", [...])`.
-- Retorna lista unificada `{ userId, role: "owner" | "contributor" | "viewer", displayName, username, avatarUrl }`, com o dono sempre primeiro e sem duplicatas (caso o dono também esteja em `timeline_members`).
-- React Query key: `["timeline-members", timelineId]`.
+2. **Criar `src/components/LynyLogo.tsx`**
+   - Componente que renderiza o SVG inline (paths convertidos), aceitando props:
+     - `height` (default 28)
+     - `className` (para herdar `text-foreground` etc.)
+     - `aria-label="lyny"`
+   - SVG com `fill="currentColor"` para herdar a cor do tema (substitui os gradientes por cor sólida do tema, mantendo o traço original).
+   - Ratio preservado via `viewBox="0 0 185 109"`, `width="auto"`.
 
-Observação RLS: as policies já permitem ao dono ver todos os membros, e cada membro vê a si próprio. Para a lista completa funcionar para membros não-donos, vamos relaxar via consulta — se o usuário não é dono, ainda assim verá pelo menos a si mesmo + dono (via profiles). Para o escopo atual (avatares visuais), isso é suficiente; só o dono terá a lista 100% completa, o que se alinha com o requisito "Só o dono vê o role de cada participante".
+3. **Substituir usos atuais do texto "lyny"**
+   - `src/components/AppHeader.tsx` linha 73-78 → `<LynyLogo height={28} />` (cobre Home, Notifications, Profile, Relationships).
+   - `src/pages/Splash.tsx` linhas 39-58 → trocar o ícone `Heart` + texto "Lyny" por `<LynyLogo height={64} />`.
+   - `src/pages/Onboarding.tsx` — adicionar `<LynyLogo height={48} />` no topo (acima dos slides).
+   - `src/pages/Auth.tsx` linha 179 → `<LynyLogo height={48} className="mx-auto mb-3" />` (substitui o `<img src="/lyny-logo.png">`).
+   - `src/pages/EventInvite.tsx` linha 54 → `<LynyLogo height={28} />`.
 
-## 2. Componente `TimelineParticipants`
-
-Novo arquivo `src/components/TimelineParticipants.tsx`:
-
-- Props: `timelineId: string`, `isOwner: boolean`.
-- Usa `useTimelineMembers`.
-- Renderiza stack horizontal com até 5 avatares sobrepostos (`-ml-2`, `ring-2 ring-background`), usando `Avatar`/`AvatarImage`/`AvatarFallback` (iniciais do `displayName` ou `username`).
-- Se houver mais de 5, mostra um círculo extra `+N`.
-- Toda a área é clicável (touch target ≥44px) e abre um `Sheet` com a lista completa:
-  - Cada linha: avatar, nome (`@username` abaixo), e — apenas se `isOwner` — uma badge com role traduzido: `Dono`, `Contribuidor`, `Visualizador`.
-- Haptic `navigator.vibrate(10)` no toque (segue padrão do projeto).
-
-## 3. Integração em `TimelineDetail.tsx`
-
-- Importar `TimelineParticipants`.
-- Renderizar logo abaixo do bloco de capa (antes do `uploads`/feed), dentro de `max-w-md mx-auto px-4`, com um pequeno título "Participantes" em `text-xs uppercase text-muted-foreground` e o stack abaixo.
-- Passar `timelineId={timeline.id}` e `isOwner={isOwner}`.
+4. **PWA / favicon**
+   - Atualizar `public/manifest.webmanifest` para apontar ícones para o novo SVG (mantém PNGs existentes se houver, apenas adiciona o SVG como ícone primário).
+   - Atualizar `<link rel="icon">` em `index.html` para `/lyny-logo.svg`.
 
 ## Detalhes técnicos
 
-- Iniciais: pegar primeira letra de cada palavra do `displayName` (até 2), fallback para `username[0]`.
-- Sem alterações de schema, sem migrations.
-- Sem autoplay/scroll programático (respeita regra do projeto).
-- Tema escuro: `ring-background` nos avatares para criar separação visual no stack.
+- O SVG usa gradientes (`paint0_linear_3307_312` etc.). No componente vou:
+  - Manter os `<defs>` originais com gradientes para preservar o visual fiel.
+  - Como alternativa para casos monocromáticos (ex: header escuro), oferecer prop `monochrome?: boolean` que substitui os gradientes por `fill="currentColor"`.
+- Não há mudança de comportamento, apenas apresentação.
+
+## Arquivos a alterar
+- `src/components/LynyLogo.tsx` (novo)
+- `src/assets/lyny-logo.svg` (novo)
+- `public/lyny-logo.svg` (novo)
+- `src/components/AppHeader.tsx`
+- `src/pages/Splash.tsx`
+- `src/pages/Onboarding.tsx`
+- `src/pages/Auth.tsx`
+- `src/pages/EventInvite.tsx`
+- `index.html`
+- `public/manifest.webmanifest`
