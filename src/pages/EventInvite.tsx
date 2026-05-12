@@ -4,6 +4,7 @@ import { Calendar, MapPin, Gift, Check, Heart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import LynyLogo from "@/components/LynyLogo";
 
 const EventInvite = () => {
   const { eventId } = useParams();
@@ -50,8 +51,7 @@ const EventInvite = () => {
       {/* Header com Branding Lyny */}
       <div className="p-4 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Heart size={20} className="text-lyny-graphite fill-current" />
-          <span className="text-lg font-bold text-lyny-graphite">Lyny</span>
+          <span className="text-lyny-graphite"><LynyLogo height={24} /></span>
         </div>
         <p className="text-xs text-lyny-graphite/70">Convite especial para você</p>
       </div>

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import LynyLogo from "@/components/LynyLogo";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -36,22 +36,10 @@ const Splash = () => {
   return (
     <div className="min-h-screen bg-lyny-1 flex flex-col items-center justify-center px-4 animate-fade-in">
       {/* Logo/Wordmark */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 text-lyny-graphite">
         <div className="flex items-center justify-center mb-4">
-          <div className="relative">
-            <Heart 
-              size={48} 
-              className="text-lyny-graphite fill-current animate-pulse" 
-              strokeWidth={1.5}
-            />
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-lyny-graphite rounded-full" />
-          </div>
+          <LynyLogo height={64} />
         </div>
-        
-        <h1 className="text-5xl font-bold tracking-tight text-lyny-graphite mb-2">
-          Lyny
-        </h1>
-        
         <p className="text-lg text-lyny-graphite/80 font-medium">
           Suas memórias, suas regras.
         </p>
