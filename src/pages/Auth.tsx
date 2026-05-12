@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useToast } from "@/hooks/use-toast";
+import LynyLogo from "@/components/LynyLogo";
 
 type FieldErrors = Partial<Record<"username" | "email" | "password" | "confirmPassword", string>>;
 
