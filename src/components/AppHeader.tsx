@@ -70,12 +70,9 @@ const AppHeader = ({ drawerContent, onMenuClick }: AppHeaderProps) => {
           </Sheet>
         )}
 
-        <h1
-          className="absolute left-1/2 -translate-x-1/2 font-display italic text-2xl text-foreground select-none"
-          aria-label="lyny"
-        >
-          lyny
-        </h1>
+        <div className="absolute left-1/2 -translate-x-1/2 text-foreground select-none">
+          <LynyLogo height={28} />
+        </div>
 
         <button
           onClick={() => {
