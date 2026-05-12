@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Lock, Layers, Users, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import LynyLogo from "@/components/LynyLogo";
 
 const SLIDES: Array<{ title: string; subtitle: string; Icon: LucideIcon }> = [
   {
@@ -98,6 +99,9 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground flex flex-col px-6 pt-12 pb-8 safe-area-inset-top safe-area-inset-bottom">
+      <div className="flex justify-center mb-6">
+        <LynyLogo height={48} />
+      </div>
       <div className="flex-1 flex flex-col items-center justify-center text-center max-w-md mx-auto w-full">
         <div
           className="w-28 h-28 rounded-app-xl bg-muted/20 border border-border flex items-center justify-center mb-10 transition-all duration-300"

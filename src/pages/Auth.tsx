@@ -176,7 +176,9 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <GlassCard className="w-full max-w-sm p-6 border border-border">
         <div className="text-center mb-6">
-          <img src="/lyny-logo.png" alt="lyny" className="h-10 w-auto mx-auto mb-3" />
+          <div className="flex justify-center mb-3 text-foreground">
+            <LynyLogo height={48} />
+          </div>
           <h1 className="font-display font-semibold text-2xl text-foreground">
             {mode === "signin" ? "Bem-vindo de volta" : "Crie sua conta"}
           </h1>
