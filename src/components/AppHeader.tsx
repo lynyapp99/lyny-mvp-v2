@@ -9,6 +9,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState, ReactNode } from "react";
+import LynyLogo from "@/components/LynyLogo";
 
 interface AppHeaderProps {
   /** Optional content rendered inside the drawer opened from the hamburger menu. */
