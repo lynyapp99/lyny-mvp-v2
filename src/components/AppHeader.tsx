@@ -52,7 +52,7 @@ const AppHeader = ({ drawerContent, onMenuClick }: AppHeaderProps) => {
 
   return (
     <header
-      className="sticky top-0 z-40 bg-background"
+      className="sticky top-0 z-40 ios-glass-md !rounded-none ios-hairline-b"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between relative">

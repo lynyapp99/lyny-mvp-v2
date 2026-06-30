@@ -28,7 +28,7 @@ const ContextHeader = ({ title, onBack, onShare, showShare = true, onInvite, sho
   const hasMenu = !!menuItems && menuItems.length > 0;
   return (
     <header
-      className="sticky top-0 z-40 bg-background"
+      className="sticky top-0 z-40 ios-glass-md !rounded-none ios-hairline-b"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-2 relative">
