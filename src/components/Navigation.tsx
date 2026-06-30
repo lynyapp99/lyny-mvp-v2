@@ -14,7 +14,7 @@ const Navigation = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
-      <div className="absolute inset-0 bg-background/85 backdrop-blur-2xl border-t border-border/50" />
+      <div className="absolute inset-0 ios-glass-lg !rounded-none ios-hairline-t" />
 
       <div
         className="relative max-w-md mx-auto px-2 pt-4"
