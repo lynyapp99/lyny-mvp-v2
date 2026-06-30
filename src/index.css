@@ -2,224 +2,447 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Shadow Design System - Dark app-only
-All colors MUST be HSL. */
+/* =============================================================
+   Lyny — iOS 27 Design System
+   Dark Mode (padrão) + Light Mode via .dark / .light no <html>
+   Accent: iOS System Red (#FF4245)
+   Tokens extraídos do Apple iOS 27 UI Kit oficial.
+   ============================================================= */
 
 @layer base {
   :root {
-    /* Shadow Base Colors */
-    --bg: 240 5% 5%;              /* #0B0B0C */
-    --surface: 0 0% 10%;          /* #1A1A1A */
-    --surface-2: 0 0% 12%;        /* #1E1E1E */
-    
-    /* Text & Icons */
-    --text: 0 0% 96%;             /* #F5F5F5 */
-    --text-2: 0 0% 62%;           /* #9E9E9E */
-    
-    /* Dividers */
-    --divider: 240 6% 17%;        /* #2A2A2E */
-    
-    /* Accent (Red) */
-    --accent: 353 87% 48%;        /* #E0162B */
-    --accent-press: 353 84% 38%;  /* #B50F21 */
-    --accent-soft: 353 57% 12%;   /* #2A0D11 */
-    
-    /* Warning/Detail (Gold) */
-    --warning: 45 89% 61%;        /* #F4C542 */
-    --warning-dark: 45 100% 36%;  /* #B88900 */
-    
-    /* Focus & Ring */
-    --focus: 353 87% 48% / 0.4;
-    --ring: 45 89% 61%;           /* Gold ring */
-    
-    /* Shadows */
-    --elev-1: 0 2px 8px rgb(0 0 0 / 0.35);
-    --elev-2: 0 6px 20px rgb(0 0 0 / 0.45);
-    
-    /* Sistema Base (Shadow) */
-    --background: 240 5% 5%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 96%;
-    
-    /* Primary = Red accent */
-    --primary: 353 87% 48%;
+    /* ---------- iOS 27 raw tokens — DARK (default) ---------- */
+
+    /* Labels */
+    --ios-label-primary:     255 255 255;
+    --ios-label-secondary:   235 235 245;
+    --ios-label-tertiary:    235 235 245;
+    --ios-label-quaternary:  235 235 245;
+    --ios-label-secondary-a:   0.60;
+    --ios-label-tertiary-a:    0.30;
+    --ios-label-quaternary-a:  0.16;
+
+    /* Backgrounds — base */
+    --ios-bg-primary:        0 0 0;
+    --ios-bg-secondary:      28 28 30;
+    --ios-bg-tertiary:       44 44 46;
+    /* Backgrounds — elevated */
+    --ios-bg-elev-primary:   28 28 30;
+    --ios-bg-elev-secondary: 44 44 46;
+    --ios-bg-elev-tertiary:  58 58 60;
+    /* Grouped */
+    --ios-bg-grouped-primary:   0 0 0;
+    --ios-bg-grouped-secondary: 28 28 30;
+    --ios-bg-grouped-tertiary:  44 44 46;
+
+    /* Fills */
+    --ios-fill-primary:    120 120 128;
+    --ios-fill-secondary:  120 120 128;
+    --ios-fill-tertiary:   118 118 128;
+    --ios-fill-quaternary: 118 118 128;
+    --ios-fill-primary-a:    0.36;
+    --ios-fill-secondary-a:  0.32;
+    --ios-fill-tertiary-a:   0.24;
+    --ios-fill-quaternary-a: 0.18;
+
+    /* Separators */
+    --ios-separator:        255 255 255;
+    --ios-separator-a:      0.12;
+    --ios-separator-opaque: 56 56 58;
+
+    /* System colors (dark variants) */
+    --ios-blue:    0 145 255;
+    --ios-green:   48 209 88;
+    --ios-red:     255 66 69;
+    --ios-orange:  255 146 48;
+    --ios-yellow:  255 214 0;
+    --ios-purple:  219 52 242;
+    --ios-pink:    255 55 95;
+    --ios-indigo:  109 124 255;
+    --ios-teal:    0 210 224;
+    --ios-cyan:    60 211 254;
+    --ios-mint:    0 218 195;
+
+    /* Accent: iOS System Red */
+    --accent-rgb: 255 66 69;
+
+    /* ---------- shadcn semantic tokens (HSL) — DARK ---------- */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 240 6% 11%;             /* #1C1C1E */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 240 6% 11%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 359 100% 63%;        /* #FF4245 */
     --primary-foreground: 0 0% 100%;
-    
-    /* Secondary = Surface-2 */
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 96%;
-    
-    /* Muted */
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 62%;
-    
-    /* Accent (mapped to red) */
-    --accent-color: 353 87% 48%;
+
+    --secondary: 240 4% 17%;        /* fill-ish */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 240 4% 17%;
+    --muted-foreground: 240 6% 70%; /* approx rgba(235,235,245,0.6) */
+
+    --accent: 359 100% 63%;
     --accent-foreground: 0 0% 100%;
-    
-    /* Destructive (using red) */
-    --destructive: 353 87% 48%;
+
+    --destructive: 359 100% 63%;
     --destructive-foreground: 0 0% 100%;
-    
-    /* Borders & inputs */
-    --border: 240 6% 17%;
-    --input: 0 0% 12%;
+
+    --border: 240 3% 23%;           /* #38383A opaque separator */
+    --input: 240 4% 17%;
+    --ring: 359 100% 63%;
     --radius: 0.875rem;
-    
-    /* Chart colors (adjusted for dark) */
-    --chart-1: 353 87% 48%;
-    --chart-2: 142 70% 45%;
-    --chart-3: 45 89% 61%;
-    --chart-4: 210 80% 50%;
-    --chart-5: 270 70% 60%;
-    
-    /* Timeline colors (adapted) */
-    --timeline-pink: 353 87% 48%;
-    --timeline-blue: 210 80% 50%;
-    --timeline-green: 142 70% 45%;
-    --timeline-yellow: 45 89% 61%;
-    --timeline-purple: 270 70% 60%;
-    --timeline-orange: 25 85% 55%;
-    
-    /* Legacy brand colors for compatibility */
-    --lyny-peach: 25 85% 55%;
-    --lyny-blush: 353 87% 48%;
-    --lyny-aqua: 192 60% 40%;
-    --lyny-mint: 142 70% 45%;
-    --lyny-gold: 45 89% 61%;
-    --lyny-lavender: 270 70% 60%;
-    --lyny-sand: 240 8% 10%;
-    --lyny-graphite: 240 5% 5%;
-    
-    /* Gradients for sectors (dark adapted) */
-    --pink-gradient: linear-gradient(135deg, hsl(353, 87%, 48%) 0%, hsl(353, 84%, 38%) 100%);
-    --blue-gradient: linear-gradient(135deg, hsl(210, 80%, 50%) 0%, hsl(210, 70%, 40%) 100%);
-    --green-gradient: linear-gradient(135deg, hsl(142, 70%, 45%) 0%, hsl(142, 60%, 35%) 100%);
-    --purple-gradient: linear-gradient(135deg, hsl(270, 70%, 60%) 0%, hsl(270, 60%, 50%) 100%);
-    --orange-gradient: linear-gradient(135deg, hsl(25, 85%, 55%) 0%, hsl(25, 75%, 45%) 100%);
-    --yellow-gradient: linear-gradient(135deg, hsl(45, 89%, 61%) 0%, hsl(45, 100%, 36%) 100%);
-    
-    /* Shadows & elevations */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.35);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.45);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.55), 0 8px 10px -6px rgb(0 0 0 / 0.55);
-    --shadow-elevated: 0 12px 28px 0 rgb(0 0 0 / 0.45), 0 4px 8px 0 rgb(0 0 0 / 0.4);
-    
-    /* Card border (neutral, no red glow) */
+
+    /* Legacy compatibility (mapped to iOS accent / system colors) */
+    --bg: 0 0% 0%;
+    --surface: 240 6% 11%;
+    --surface-2: 240 4% 18%;
+    --text: 0 0% 100%;
+    --text-2: 240 6% 70%;
+    --divider: 240 3% 23%;
+    --accent-press: 359 76% 50%;
+    --accent-soft: 359 60% 14%;
+    --warning: 50 100% 50%;
+    --focus: 359 100% 63% / 0.4;
+
+    --timeline-pink:   353 87% 56%;
+    --timeline-blue:   210 100% 50%;
+    --timeline-green:  142 70% 50%;
+    --timeline-yellow: 50 100% 50%;
+    --timeline-purple: 290 88% 58%;
+    --timeline-orange: 25 100% 59%;
+
+    --lyny-peach:    25 100% 59%;
+    --lyny-blush:    353 87% 56%;
+    --lyny-aqua:     185 100% 44%;
+    --lyny-mint:     170 100% 43%;
+    --lyny-gold:     50 100% 50%;
+    --lyny-lavender: 290 88% 58%;
+    --lyny-sand:     240 6% 11%;
+    --lyny-graphite: 0 0% 0%;
+
+    /* Gradients (kept for legacy uses, neutralized) */
+    --pink-gradient:   linear-gradient(135deg, hsl(var(--timeline-pink)) 0%, hsl(var(--accent)) 100%);
+    --blue-gradient:   linear-gradient(135deg, hsl(var(--timeline-blue)) 0%, hsl(210 80% 35%) 100%);
+    --green-gradient:  linear-gradient(135deg, hsl(var(--timeline-green)) 0%, hsl(142 60% 35%) 100%);
+    --purple-gradient: linear-gradient(135deg, hsl(var(--timeline-purple)) 0%, hsl(290 70% 45%) 100%);
+    --orange-gradient: linear-gradient(135deg, hsl(var(--timeline-orange)) 0%, hsl(25 90% 45%) 100%);
+    --yellow-gradient: linear-gradient(135deg, hsl(var(--timeline-yellow)) 0%, hsl(40 95% 45%) 100%);
+
+    /* Shadows */
+    --shadow-sm:       0 1px 2px 0 rgb(0 0 0 / 0.45);
+    --shadow:          0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+    --shadow-md:       0 4px 6px -1px rgb(0 0 0 / 0.55), 0 2px 4px -2px rgb(0 0 0 / 0.55);
+    --shadow-lg:       0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
+    --shadow-xl:       0 20px 25px -5px rgb(0 0 0 / 0.65), 0 8px 10px -6px rgb(0 0 0 / 0.65);
+    --shadow-elevated: 0 12px 28px 0 rgb(0 0 0 / 0.55), 0 4px 8px 0 rgb(0 0 0 / 0.5);
+    --elev-1: 0 2px 8px rgb(0 0 0 / 0.45);
+    --elev-2: 0 6px 20px rgb(0 0 0 / 0.55);
+
     --card-glow: 0 0 0 1px rgba(255, 255, 255, 0.04);
-    
-    /* Radius tokens */
-    --radius-card: 0.875rem;
-    --radius-lg: 1rem;
+    --radius-card: 16px;
+    --radius-lg: 20px;
+
+    /* Liquid Glass — DARK */
+    --glass-bg-sm: rgba(40, 40, 42, 0.55);
+    --glass-bg-md: rgba(28, 28, 30, 0.72);
+    --glass-bg-lg: rgba(28, 28, 30, 0.62);
+    --glass-border: rgba(255, 255, 255, 0.08);
   }
 
-  /* Light theme overrides — applied when <html class="light"> */
+  /* ---------- LIGHT MODE ---------- */
   .light {
-    --bg: 36 38% 97%;             /* #FAF7F2 */
-    --surface: 0 0% 100%;         /* #FFFFFF */
-    --surface-2: 40 41% 90%;      /* #F0E8D8 */
+    --ios-label-primary:     0 0 0;
+    --ios-label-secondary:   60 60 67;
+    --ios-label-tertiary:    60 60 67;
+    --ios-label-quaternary:  60 60 67;
+    --ios-label-secondary-a:   0.60;
+    --ios-label-tertiary-a:    0.30;
+    --ios-label-quaternary-a:  0.18;
 
-    --text: 28 39% 17%;           /* #3B2A1A */
-    --text-2: 28 39% 30%;         /* #6B4C30 */
+    --ios-bg-primary:        255 255 255;
+    --ios-bg-secondary:      242 242 247;
+    --ios-bg-tertiary:       255 255 255;
+    --ios-bg-elev-primary:   255 255 255;
+    --ios-bg-elev-secondary: 242 242 247;
+    --ios-bg-elev-tertiary:  255 255 255;
+    --ios-bg-grouped-primary:   242 242 247;
+    --ios-bg-grouped-secondary: 255 255 255;
+    --ios-bg-grouped-tertiary:  242 242 247;
 
-    --divider: 33 32% 86%;        /* #E8DDD0 */
+    --ios-fill-primary:    120 120 120;
+    --ios-fill-primary-a:  0.20;
+    --ios-fill-secondary-a: 0.16;
+    --ios-fill-tertiary-a:  0.12;
+    --ios-fill-quaternary-a:0.08;
 
-    --accent: 15 52% 54%;         /* #C7694A terracota */
-    --accent-press: 15 52% 44%;
-    --accent-soft: 15 52% 92%;
+    --ios-separator:        0 0 0;
+    --ios-separator-a:      0.12;
+    --ios-separator-opaque: 198 198 200;
 
-    --focus: 15 52% 54% / 0.35;
-    --ring: 15 52% 54%;
+    /* iOS light system colors */
+    --ios-blue:    0 122 255;
+    --ios-green:   52 199 89;
+    --ios-red:     255 59 48;
+    --ios-orange:  255 149 0;
+    --ios-yellow:  255 204 0;
+    --ios-purple:  175 82 222;
+    --ios-pink:    255 45 85;
+    --ios-indigo:  88 86 214;
+    --ios-teal:    48 176 199;
+    --ios-cyan:    50 173 230;
+    --ios-mint:    0 199 190;
 
-    --background: 36 38% 97%;
-    --foreground: 28 39% 17%;
+    --accent-rgb: 255 59 48;
+
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
     --card: 0 0% 100%;
-    --card-foreground: 28 39% 17%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 28 39% 17%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 15 52% 54%;
+    --primary: 4 100% 59%;          /* iOS Red light */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 41% 90%;
-    --secondary-foreground: 28 39% 17%;
+    --secondary: 240 23% 96%;       /* #F2F2F7 */
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 40 41% 92%;
-    --muted-foreground: 28 39% 30%;
+    --muted: 240 23% 96%;
+    --muted-foreground: 240 5% 26%; /* secondary label approx */
 
-    --accent-color: 15 52% 54%;
+    --accent: 4 100% 59%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 15 52% 54%;
+    --destructive: 4 100% 59%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 33 32% 86%;
-    --input: 33 32% 86%;
+    --border: 240 3% 78%;
+    --input: 240 23% 96%;
+    --ring: 4 100% 59%;
 
-    --badge-private-bg: 117 23% 81%;
-    --badge-private-fg: 118 36% 26%;
+    --bg: 0 0% 100%;
+    --surface: 0 0% 100%;
+    --surface-2: 240 23% 96%;
+    --text: 0 0% 0%;
+    --text-2: 240 5% 26%;
+    --divider: 240 3% 78%;
+    --accent-press: 4 84% 48%;
+    --accent-soft: 4 100% 95%;
+    --focus: 4 100% 59% / 0.35;
 
     --card-glow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+    --shadow-sm:       0 1px 2px 0 rgb(0 0 0 / 0.06);
+    --shadow:          0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+    --shadow-md:       0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+    --shadow-lg:       0 10px 15px -3px rgb(0 0 0 / 0.10), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+    --shadow-xl:       0 20px 25px -5px rgb(0 0 0 / 0.12), 0 8px 10px -6px rgb(0 0 0 / 0.10);
+    --shadow-elevated: 0 12px 28px 0 rgb(0 0 0 / 0.10), 0 4px 8px 0 rgb(0 0 0 / 0.08);
     --elev-1: 0 2px 8px rgb(60 40 20 / 0.08);
     --elev-2: 0 6px 20px rgb(60 40 20 / 0.10);
-  }
 
+    /* Liquid Glass — LIGHT */
+    --glass-bg-sm: rgba(255, 255, 255, 0.55);
+    --glass-bg-md: rgba(255, 255, 255, 0.72);
+    --glass-bg-lg: rgba(255, 255, 255, 0.62);
+    --glass-border: rgba(0, 0, 0, 0.08);
+  }
 
   * {
     @apply border-border;
   }
-  
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-    overscroll-behavior-y: none;
-  }
 
-  /* Screen titles default to Playfair Display */
-  h1 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
-  /* Smooth scrolling & touch optimization */
   html {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
     overflow-x: hidden;
   }
-  
-  html, body, #root {
-    height: 100%;
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: inherit;
+    font-size: 17px;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    overscroll-behavior-y: none;
   }
-  
-  * {
-    -webkit-tap-highlight-color: transparent;
+
+  h1, h2, h3, h4 {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
-  
-  /* iOS Safe Areas */
-  .safe-area-inset-top {
-    padding-top: env(safe-area-inset-top);
+
+  html, body, #root { height: 100%; }
+  * { -webkit-tap-highlight-color: transparent; }
+
+  .safe-area-inset-top { padding-top: env(safe-area-inset-top); }
+  .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .pb-safe { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+}
+
+/* =============================================================
+   COMPONENTS
+   ============================================================= */
+@layer components {
+
+  /* ---- iOS typography scale ---- */
+  .ios-large-title { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: 0.37px; }
+  .ios-title-1     { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: 0.36px; }
+  .ios-title-2     { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: 0.35px; }
+  .ios-title-3     { font-size: 20px; line-height: 25px; font-weight: 600; letter-spacing: 0.38px; }
+  .ios-headline    { font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -0.41px; }
+  .ios-body        { font-size: 17px; line-height: 22px; font-weight: 400; letter-spacing: -0.41px; }
+  .ios-callout     { font-size: 16px; line-height: 21px; font-weight: 400; letter-spacing: -0.32px; }
+  .ios-subhead     { font-size: 15px; line-height: 20px; font-weight: 400; letter-spacing: -0.24px; }
+  .ios-footnote    { font-size: 13px; line-height: 18px; font-weight: 400; letter-spacing: -0.08px; }
+  .ios-caption-1   { font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0; }
+  .ios-caption-2   { font-size: 11px; line-height: 13px; font-weight: 400; letter-spacing: 0.07px; }
+
+  /* ---- Liquid Glass ---- */
+  .ios-glass-sm {
+    background: var(--glass-bg-sm);
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
+    border: 0.5px solid var(--glass-border);
+    border-radius: 14px;
   }
-  
-  .safe-area-inset-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+  .ios-glass-md {
+    background: var(--glass-bg-md);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 0.5px solid var(--glass-border);
+    border-radius: 20px;
   }
-  
-  .pb-safe {
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  .ios-glass-lg {
+    background: var(--glass-bg-lg);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 0.5px solid var(--glass-border);
+    border-radius: 28px;
+  }
+  .ios-hairline-b { box-shadow: inset 0 -0.5px 0 var(--glass-border); }
+  .ios-hairline-t { box-shadow: inset 0 0.5px 0 var(--glass-border); }
+
+  /* ---- iOS buttons ---- */
+  .lyny-button {
+    @apply rounded-pill px-5 py-3 font-semibold overflow-hidden;
+    min-height: 44px;
+    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
+    touch-action: manipulation;
+    letter-spacing: -0.01em;
+  }
+  .lyny-button:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  .lyny-button-primary {
+    @apply lyny-button text-white;
+    background: hsl(var(--primary));
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+  .lyny-button-primary:active {
+    background: hsl(var(--accent-press));
+    transform: scale(0.97);
+  }
+  .lyny-button-subtle {
+    @apply lyny-button text-foreground;
+    background: rgb(var(--ios-fill-primary) / var(--ios-fill-primary-a));
+    border: none;
+  }
+  .lyny-button-subtle:active { transform: scale(0.97); filter: brightness(0.92); }
+  .lyny-button-ghost {
+    @apply rounded-app px-4 py-3 font-semibold bg-transparent;
+    min-height: 44px;
+    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
+    color: hsl(var(--foreground));
+    border: none;
+    touch-action: manipulation;
+  }
+  .lyny-button-ghost:active {
+    background: rgb(var(--ios-fill-tertiary) / var(--ios-fill-tertiary-a));
+    transform: scale(0.97);
+  }
+
+  /* ---- Cards (iOS grouped/elevated) ---- */
+  .lyny-card {
+    @apply rounded-app-xl overflow-hidden;
+    background: hsl(var(--card));
+    border: 0.5px solid hsl(var(--border));
+    box-shadow: var(--shadow-sm);
+    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .lyny-card:active { transform: scale(0.98); box-shadow: var(--shadow-md); }
+  .timeline-card { @apply lyny-card; }
+
+  /* Sector cards keep gradients (legacy) but with new tokens */
+  .sector-card-pink   { background: var(--pink-gradient);   border: 0.5px solid hsl(var(--border)); box-shadow: var(--shadow-md); }
+  .sector-card-blue   { background: var(--blue-gradient);   border: 0.5px solid hsl(var(--border)); box-shadow: var(--shadow-md); }
+  .sector-card-green  { background: var(--green-gradient);  border: 0.5px solid hsl(var(--border)); box-shadow: var(--shadow-md); }
+  .sector-card-purple { background: var(--purple-gradient); border: 0.5px solid hsl(var(--border)); box-shadow: var(--shadow-md); }
+  .sector-card-orange { background: var(--orange-gradient); border: 0.5px solid hsl(var(--border)); box-shadow: var(--shadow-md); }
+  .sector-card-yellow { background: var(--yellow-gradient); border: 0.5px solid hsl(var(--border)); box-shadow: var(--shadow-md); }
+  .sector-title-pink   { color: hsl(var(--timeline-pink)); }
+  .sector-title-blue   { color: hsl(var(--timeline-blue)); }
+  .sector-title-green  { color: hsl(var(--timeline-green)); }
+  .sector-title-yellow { color: hsl(var(--timeline-yellow)); }
+  .sector-title-purple { color: hsl(var(--timeline-purple)); }
+  .sector-title-orange { color: hsl(var(--timeline-orange)); }
+
+  /* ---- Glass (legacy alias) ---- */
+  .glass {
+    @apply ios-glass-md;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ---- shadow base helpers ---- */
+  .bg-shadow-1 { background: linear-gradient(to bottom right, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%); }
+  .bg-shadow-2 { background: linear-gradient(to bottom right, hsl(var(--secondary)) 0%, hsl(var(--background)) 100%); }
+
+  /* Animations */
+  .animate-fade-in   { @apply animate-in fade-in duration-300; }
+  .animate-scale-in  { @apply animate-in zoom-in-95 duration-200; }
+  .animate-slide-up  { @apply animate-in slide-in-from-bottom-2 duration-300; }
+
+  @keyframes wobble {
+    0%,100% { transform: rotate(-1deg) scale(1.0); }
+    25%     { transform: rotate(1deg) scale(1.01); }
+    50%     { transform: rotate(-0.5deg) scale(1.0); }
+    75%     { transform: rotate(0.5deg) scale(1.01); }
+  }
+  .animate-wobble { animation: wobble 0.5s ease-in-out infinite; transform-origin: center; }
+
+  .dragging { opacity: 0.5; cursor: grabbing; }
+  .drag-over { border: 2px dashed hsl(var(--primary)); background: hsl(var(--primary) / 0.1); }
+
+  .sectors-window {
+    height: 56vh;
+    min-height: 400px;
+    max-height: 600px;
+    position: relative;
+    padding-bottom: 8vh;
+  }
+  .overscroll-none { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
+  .scroll-smooth { scroll-behavior: smooth; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-smooth { scroll-behavior: auto; }
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 }
 
-/* Lyny Carousel & Scroll Utilities */
+/* =============================================================
+   UTILITIES
+   ============================================================= */
 @layer utilities {
-  /* Carrossel Horizontal com Snap */
   .carousel-horizontal {
     display: flex;
     overflow-x: auto;
@@ -232,309 +455,46 @@ All colors MUST be HSL. */
     gap: 1rem;
     padding: 0 1rem;
   }
-  
-  .carousel-horizontal::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .scrollbar-hide {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .carousel-item {
-    scroll-snap-align: start;
-    flex-shrink: 0;
-  }
-  
-  .scroll-snap-stop-always {
-    scroll-snap-stop: always;
-  }
-  
-  .scroll-snap-align-start {
-    scroll-snap-align: start;
-  }
-  
-  /* Touch actions */
-  .touch-pan-y {
-    touch-action: pan-y;
-  }
-  
-  .touch-manipulation {
-    touch-action: manipulation;
-  }
-  
-  /* Skeleton Loader */
+  .carousel-horizontal::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .carousel-item { scroll-snap-align: start; flex-shrink: 0; }
+  .scroll-snap-stop-always { scroll-snap-stop: always; }
+  .scroll-snap-align-start { scroll-snap-align: start; }
+  .touch-pan-y { touch-action: pan-y; }
+  .touch-manipulation { touch-action: manipulation; }
+
   .skeleton {
     @apply animate-pulse bg-gradient-to-r from-muted via-muted/50 to-muted bg-[length:200%_100%];
     animation: shimmer 2s infinite;
   }
-  
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
-  
-  /* Smooth Transitions - Lyny Easing */
-  .transition-lyny {
-    transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  
-  .transition-lyny-fast {
-    transition: all 150ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-}
 
-@layer components {
-  /* Shadow Background Gradients */
-  .bg-shadow-1 {
-    background: linear-gradient(to bottom right, hsl(var(--surface)) 0%, hsl(var(--surface-2)) 100%);
-  }
-  
-  .bg-shadow-2 {
-    background: linear-gradient(to bottom right, hsl(var(--surface-2)) 0%, hsl(var(--bg)) 100%);
-  }
+  .transition-lyny      { transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1); }
+  .transition-lyny-fast { transition: all 150ms cubic-bezier(0.22, 1, 0.36, 1); }
 
-  /* Sector Cards Shadow - Dark themed with subtle red glow */
-  .sector-card-pink {
-    background: var(--pink-gradient);
-    @apply text-foreground;
-    border: 1px solid hsl(var(--divider));
-    box-shadow: var(--card-glow), var(--shadow-md);
-  }
-  
-  .sector-card-blue {
-    background: var(--blue-gradient);
-    @apply text-foreground;
-    border: 1px solid hsl(var(--divider));
-    box-shadow: var(--card-glow), var(--shadow-md);
-  }
-  
-  .sector-card-green {
-    background: var(--green-gradient);
-    @apply text-foreground;
-    border: 1px solid hsl(var(--divider));
-    box-shadow: var(--card-glow), var(--shadow-md);
-  }
-  
-  .sector-card-purple {
-    background: var(--purple-gradient);
-    @apply text-foreground;
-    border: 1px solid hsl(var(--divider));
-    box-shadow: var(--card-glow), var(--shadow-md);
-  }
-  
-  .sector-card-orange {
-    background: var(--orange-gradient);
-    @apply text-foreground;
-    border: 1px solid hsl(var(--divider));
-    box-shadow: var(--card-glow), var(--shadow-md);
-  }
-  
-  .sector-card-yellow {
-    background: var(--yellow-gradient);
-    @apply text-foreground;
-    border: 1px solid hsl(var(--divider));
-    box-shadow: var(--card-glow), var(--shadow-md);
-  }
+  /* iOS color utilities */
+  .text-ios-blue   { color: rgb(var(--ios-blue)); }
+  .text-ios-green  { color: rgb(var(--ios-green)); }
+  .text-ios-red    { color: rgb(var(--ios-red)); }
+  .text-ios-orange { color: rgb(var(--ios-orange)); }
+  .text-ios-yellow { color: rgb(var(--ios-yellow)); }
+  .text-ios-purple { color: rgb(var(--ios-purple)); }
+  .text-ios-pink   { color: rgb(var(--ios-pink)); }
+  .bg-ios-blue   { background-color: rgb(var(--ios-blue)); }
+  .bg-ios-green  { background-color: rgb(var(--ios-green)); }
+  .bg-ios-red    { background-color: rgb(var(--ios-red)); }
+  .bg-ios-orange { background-color: rgb(var(--ios-orange)); }
 
-  /* Shadow Sector Title Colors */
-  .sector-title-pink {
-    color: hsl(var(--timeline-pink));
-  }
-  
-  .sector-title-blue {
-    color: hsl(var(--timeline-blue));
-  }
-  
-  .sector-title-green {
-    color: hsl(var(--timeline-green));
-  }
-  
-  .sector-title-yellow {
-    color: hsl(var(--timeline-yellow));
-  }
-  
-  .sector-title-purple {
-    color: hsl(var(--timeline-purple));
-  }
-  
-  .sector-title-orange {
-    color: hsl(var(--timeline-orange));
-  }
+  /* iOS fills as bg utilities */
+  .bg-ios-fill-primary    { background-color: rgb(var(--ios-fill-primary) / var(--ios-fill-primary-a)); }
+  .bg-ios-fill-secondary  { background-color: rgb(var(--ios-fill-secondary) / var(--ios-fill-secondary-a)); }
+  .bg-ios-fill-tertiary   { background-color: rgb(var(--ios-fill-tertiary) / var(--ios-fill-tertiary-a)); }
+  .bg-ios-fill-quaternary { background-color: rgb(var(--ios-fill-quaternary) / var(--ios-fill-quaternary-a)); }
 
-  /* Shadow Buttons - Mobile-first (no hover, active only) */
-  .lyny-button {
-    @apply rounded-pill px-4 py-3 font-semibold overflow-hidden;
-    min-height: 44px;
-    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
-    touch-action: manipulation;
-  }
-  
-  .lyny-button:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px hsl(var(--focus));
-  }
-  
-  .lyny-button-primary {
-    @apply lyny-button;
-    background: hsl(var(--accent));
-    color: hsl(var(--text));
-    border: none;
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .lyny-button-primary:active {
-    background: hsl(var(--accent-press));
-    transform: scale(0.98);
-  }
-  
-  .lyny-button-subtle {
-    @apply lyny-button text-foreground;
-    background: hsl(var(--surface-2));
-    border: 1px solid hsl(var(--divider));
-  }
-  
-  .lyny-button-subtle:active {
-    transform: scale(0.98);
-    filter: brightness(0.9);
-  }
-  
-  .lyny-button-ghost {
-    @apply rounded-app px-4 py-3 font-semibold bg-transparent;
-    min-height: 44px;
-    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
-    color: hsl(var(--text));
-    border: none;
-    touch-action: manipulation;
-  }
-  
-  .lyny-button-ghost:active {
-    background: hsl(var(--surface-2));
-    transform: scale(0.98);
-  }
-  
-  .lyny-button-ghost:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-  }
-
-  /* Shadow Cards - Mobile-first with red glow */
-  .lyny-card {
-    @apply bg-card rounded-app-xl overflow-hidden;
-    border: 1px solid hsl(var(--divider));
-    box-shadow: var(--card-glow), var(--shadow-sm);
-    transition: all 120ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  
-  .lyny-card:active {
-    transform: scale(0.98);
-    box-shadow: var(--card-glow), var(--shadow-md);
-  }
-  
-  .timeline-card {
-    @apply lyny-card;
-  }
-
-  /* Glass morphism - Shadow enhanced */
-  .glass {
-    @apply backdrop-blur-xl border;
-    background: hsl(var(--surface) / 0.85);
-    border-color: hsl(var(--divider));
-    backdrop-filter: blur(20px) saturate(150%);
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Scrollbar hide */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Animations */
-  .animate-fade-in {
-    @apply animate-in fade-in duration-300;
-  }
-  
-  .animate-scale-in {
-    @apply animate-in zoom-in-95 duration-200;
-  }
-  
-  .animate-slide-up {
-    @apply animate-in slide-in-from-bottom-2 duration-300;
-  }
-
-  /* iOS-style wobble animation for edit mode */
-  @keyframes wobble {
-    0%, 100% { 
-      transform: rotate(-1deg) scale(1.0); 
-    }
-    25% { 
-      transform: rotate(1deg) scale(1.01); 
-    }
-    50% { 
-      transform: rotate(-0.5deg) scale(1.0); 
-    }
-    75% { 
-      transform: rotate(0.5deg) scale(1.01); 
-    }
-  }
-
-  .animate-wobble {
-    animation: wobble 0.5s ease-in-out infinite;
-    transform-origin: center center;
-  }
-
-  /* Dragging state */
-  .dragging {
-    opacity: 0.5;
-    cursor: grabbing;
-  }
-
-  .drag-over {
-    border: 2px dashed hsl(var(--primary));
-    background: hsl(var(--primary) / 0.1);
-  }
-
-  /* Sectores Window com peek da seção inferior */
-  .sectors-window {
-    height: 56vh;
-    min-height: 400px;
-    max-height: 600px;
-    position: relative;
-    padding-bottom: 8vh; /* Peek de 8% da próxima seção */
-  }
-
-  /* Scroll controlado - apenas gestos do usuário */
-  .overscroll-none {
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Scroll suave respeitando preferências */
-  .scroll-smooth {
-    scroll-behavior: smooth;
-  }
-
-  /* Reduzir animações se usuário preferir */
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-smooth {
-      scroll-behavior: auto;
-    }
-    
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
+  .border-ios-separator        { border-color: rgb(var(--ios-separator) / var(--ios-separator-a)); }
+  .border-ios-separator-opaque { border-color: rgb(var(--ios-separator-opaque)); }
 }
